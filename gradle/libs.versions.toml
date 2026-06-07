@@ -13,7 +13,7 @@ composeMultiplatform = "1.11.1"
 junit = "4.13.2"
 kotlin = "2.4.0"
 material3 = "1.11.0-alpha07"
-roborazzi = "1.45.0"
+roborazzi = "1.43.1"
 robolectric = "4.14.1"
 composeUiTestJunit4 = "1.7.6"
 
