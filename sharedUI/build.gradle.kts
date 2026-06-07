@@ -60,3 +60,7 @@ kotlin {
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
 }
+
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("src/androidHostTest/screenshots"))
+}
