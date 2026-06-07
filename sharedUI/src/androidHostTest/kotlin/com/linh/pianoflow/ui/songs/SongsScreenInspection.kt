@@ -41,4 +41,24 @@ class SongsScreenInspection {
             filePath = "build/outputs/roborazzi/_inspect_songs_screen.png",
         )
     }
+
+    /**
+     * Tall canvas variant: makes the viewport taller than any reasonable
+     * progression so the LazyColumn lays out every row, then snapshots
+     * the whole thing. Useful for reviewing the full scrolled content at
+     * a glance.
+     */
+    @Test
+    @Config(qualifiers = "w360dp-h4000dp-xxhdpi", sdk = [35])
+    fun inspect_songsScreen_fullProgression() {
+        composeRule.setContent {
+            MaterialTheme {
+                SongsScreen()
+            }
+        }
+        composeRule.waitForIdle()
+        composeRule.onRoot().captureRoboImage(
+            filePath = "build/outputs/roborazzi/_inspect_songs_screen_full.png",
+        )
+    }
 }
