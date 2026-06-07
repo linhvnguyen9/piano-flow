@@ -16,7 +16,7 @@ import org.robolectric.annotation.GraphicsMode
 
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w360dp-h640dp-xxhdpi")
+@Config(qualifiers = "w360dp-h640dp-xxhdpi", sdk = [35])
 class PianoKeyboardScreenshotTest {
 
     @get:Rule
@@ -38,7 +38,7 @@ class PianoKeyboardScreenshotTest {
         }
 
         composeRule.onRoot().captureRoboImage(
-            filePath = "piano_keyboard_default.png",
+            filePath = "src/androidHostTest/screenshots/piano_keyboard_default.png",
         )
     }
 }

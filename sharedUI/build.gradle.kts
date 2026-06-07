@@ -64,3 +64,18 @@ dependencies {
 roborazzi {
     outputDir.set(layout.projectDirectory.dir("src/androidHostTest/screenshots"))
 }
+
+tasks.withType<Test>().configureEach {
+    systemProperty(
+        "roborazzi.test.record",
+        project.findProperty("roborazzi.test.record")?.toString() ?: "false",
+    )
+    systemProperty(
+        "roborazzi.test.verify",
+        project.findProperty("roborazzi.test.verify")?.toString() ?: "false",
+    )
+    systemProperty(
+        "roborazzi.test.compare",
+        project.findProperty("roborazzi.test.compare")?.toString() ?: "false",
+    )
+}
