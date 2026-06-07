@@ -49,7 +49,7 @@ class SongsScreenInspection {
      * a glance.
      */
     @Test
-    @Config(qualifiers = "w360dp-h4000dp-xxhdpi", sdk = [35])
+    @Config(qualifiers = "w360dp-h2000dp-xxhdpi", sdk = [35])
     fun inspect_songsScreen_fullProgression() {
         composeRule.setContent {
             MaterialTheme {
