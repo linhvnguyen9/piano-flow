@@ -66,16 +66,15 @@ roborazzi {
 }
 
 tasks.withType<Test>().configureEach {
-    systemProperty(
-        "roborazzi.test.record",
-        project.findProperty("roborazzi.test.record")?.toString() ?: "false",
-    )
-    systemProperty(
-        "roborazzi.test.verify",
-        project.findProperty("roborazzi.test.verify")?.toString() ?: "false",
-    )
-    systemProperty(
-        "roborazzi.test.compare",
-        project.findProperty("roborazzi.test.compare")?.toString() ?: "false",
-    )
+    val record = project.findProperty("roborazzi.test.record")?.toString() ?: "false"
+    val verify = project.findProperty("roborazzi.test.verify")?.toString() ?: "false"
+    val compare = project.findProperty("roborazzi.test.compare")?.toString() ?: "false"
+
+    systemProperty("roborazzi.test.record", record)
+    systemProperty("roborazzi.test.verify", verify)
+    systemProperty("roborazzi.test.compare", compare)
+
+    inputs.property("roborazzi.test.record", record)
+    inputs.property("roborazzi.test.verify", verify)
+    inputs.property("roborazzi.test.compare", compare)
 }

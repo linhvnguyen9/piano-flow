@@ -16,26 +16,24 @@ required.
 The Roborazzi gradle plugin does not currently auto-wire its lifecycle tasks
 (`recordRoborazzi`, `verifyRoborazzi`, `compareRoborazzi`) onto the KMP
 `testAndroidHostTest` variant, so we pass the mode as a project property and
-invoke the test task directly. `--rerun-tasks` forces the test to re-execute
-even when Gradle considers it up-to-date.
+invoke the test task directly. The mode is registered as a task input, so
+changing it invalidates the test cache automatically — no `--rerun-tasks`
+needed.
 
 - Record / refresh goldens after an intentional UI change:
 
   ```bash
-  ./gradlew :sharedUI:testAndroidHostTest -Proborazzi.test.record=true --rerun-tasks
-  ```
+  ./gradlew :sharedUI:testAndroidHostTest -Proborazzi.test.record=true  ```
 
 - Verify (fail on visual diff — this is the CI command):
 
   ```bash
-  ./gradlew :sharedUI:testAndroidHostTest -Proborazzi.test.verify=true --rerun-tasks
-  ```
+  ./gradlew :sharedUI:testAndroidHostTest -Proborazzi.test.verify=true  ```
 
 - Generate a side-by-side compare PNG without failing the build:
 
   ```bash
-  ./gradlew :sharedUI:testAndroidHostTest -Proborazzi.test.compare=true --rerun-tasks
-  ```
+  ./gradlew :sharedUI:testAndroidHostTest -Proborazzi.test.compare=true  ```
 
   Output: `sharedUI/build/outputs/roborazzi/<test>_compare.png`.
 
