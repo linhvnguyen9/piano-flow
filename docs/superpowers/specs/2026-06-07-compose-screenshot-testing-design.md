@@ -4,6 +4,12 @@
 **Status:** Approved (design); pending implementation plan
 **Module:** `sharedUI`
 
+> Key decisions from this design are recorded as ADRs in [`../../adr/`](../../adr/README.md):
+> [0001](../../adr/0001-roborazzi-for-compose-screenshot-testing.md) (Roborazzi),
+> [0002](../../adr/0002-jvm-android-only-screenshot-scope.md) (JVM/Android-only scope),
+> [0003](../../adr/0003-golden-images-committed-to-git.md) (goldens in git),
+> [0004](../../adr/0004-robolectric-sdk-pin.md) (Robolectric SDK pin).
+
 ## Goal
 
 Add Compose screenshot testing to PianoFlow so visual regressions in shared UI composables are caught automatically. Initial scope is Android-only, running on the JVM (no emulator), with one pilot test proving the workflow end-to-end.
