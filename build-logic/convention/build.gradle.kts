@@ -9,6 +9,8 @@ dependencies {
     implementation(libs.androidKmpLibrary.gradlePlugin)
     implementation(libs.compose.gradlePlugin)
     implementation(libs.composeCompiler.gradlePlugin)
+    implementation(libs.ksp.gradlePlugin)
+    implementation(libs.kotlinSerialization.gradlePlugin)
 
     // Available at compile time so the class-based Roborazzi convention plugin can
     // reference the Kotlin Multiplatform and Roborazzi extension types. The plugins
@@ -23,6 +25,10 @@ gradlePlugin {
             id = "pianoflow.compose-screenshot-testing"
             implementationClass =
                 "com.linh.pianoflow.buildlogic.ComposeScreenshotTestingConventionPlugin"
+        }
+        register("enro") {
+            id = "pianoflow.enro"
+            implementationClass = "com.linh.pianoflow.buildlogic.EnroConventionPlugin"
         }
     }
 }

@@ -10,5 +10,6 @@ class PianoFlowApp : Application() {
         startKoin {
             modules(chordSmootherModule)
         }
+        PianoFlowComponent.installNavigationController(this)
     }
 }
