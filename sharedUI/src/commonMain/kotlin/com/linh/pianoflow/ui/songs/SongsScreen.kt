@@ -348,7 +348,7 @@ private fun ChordCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .clickable { onTap() },
+            .clickable { onToggleCollapse() },
         colors = CardDefaults.cardColors(containerColor = bg)
     ) {
         Column(Modifier.padding(12.dp)) {
@@ -372,6 +372,13 @@ private fun ChordCard(
                     Text(
                         row.voicing.notes.joinToString("  ") { Pitch.name(it) },
                         style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
+                    )
+                }
+                IconButton(onClick = onTap) {
+                    Icon(
+                        Icons.Filled.PlayArrow,
+                        contentDescription = "Play chord",
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 CollapseToggle(collapsed = keyboardCollapsed, onClick = onToggleCollapse)
