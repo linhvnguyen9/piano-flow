@@ -1,6 +1,7 @@
 plugins {
-    id("pianoflow.kmp.compose")
-    id("pianoflow.compose-screenshot-testing")
+    alias(libs.plugins.pianoflow.kmpCompose)
+    alias(libs.plugins.pianoflow.composeScreenshotTesting)
+    alias(libs.plugins.pianoflow.enro)
 }
 
 kotlin {

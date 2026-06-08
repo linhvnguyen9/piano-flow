@@ -1,7 +1,8 @@
 plugins {
-    id("pianoflow.kmp.library")
+    alias(libs.plugins.pianoflow.kmpLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.pianoflow.enro)
 }
 
 kotlin {

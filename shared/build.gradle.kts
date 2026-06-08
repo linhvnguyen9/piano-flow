@@ -1,5 +1,5 @@
 plugins {
-    id("pianoflow.kmp.library")
+    alias(libs.plugins.pianoflow.kmpLibrary)
 }
 
 kotlin {
