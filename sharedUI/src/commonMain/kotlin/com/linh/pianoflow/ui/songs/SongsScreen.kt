@@ -3,8 +3,6 @@ package com.linh.pianoflow.ui.songs
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -38,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -57,17 +53,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.linh.pianoflow.audio.TonePlayer
 import com.linh.pianoflow.songs.Chord
 import com.linh.pianoflow.songs.Pitch
 import com.linh.pianoflow.songs.Voicing
 import com.linh.pianoflow.songs.candidates
+import com.linh.pianoflow.songs.chordToToken
 import com.linh.pianoflow.songs.inversionName
 import com.linh.pianoflow.songs.keyboardRange
 import com.linh.pianoflow.songs.moveCost
-import com.linh.pianoflow.songs.parseProgression
+import com.linh.pianoflow.songs.parseChord
 import com.linh.pianoflow.songs.rootBaseline
 import com.linh.pianoflow.songs.solve
 import com.linh.pianoflow.songs.totalMovement
@@ -77,6 +73,13 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 private const val PLAY_STEP_MS = 750L
+
+private val EXAMPLES = listOf("C | G | Am | F", "F | G | Em | Am", "Asus4 | G7 | Cmaj7 | Am7")
+
+private sealed interface PickerTarget {
+    data object Add : PickerTarget
+    data class Edit(val index: Int, val initial: Chord?) : PickerTarget
+}
 
 private data class ChordRow(
     val label: String,
@@ -90,14 +93,16 @@ private data class ChordRow(
 
 @Composable
 fun SongsScreen() {
-    var input by remember { mutableStateOf("C | G | Am | F") }
+    var tokens by remember { mutableStateOf(listOf("C", "G", "Am", "F")) }
+    var editingText by remember { mutableStateOf("") }
+    var pickerTarget by remember { mutableStateOf<PickerTarget?>(null) }
     var anchor by remember { mutableStateOf(true) }
     var activeRow by remember { mutableStateOf<Int?>(null) }
     var isPlaying by remember { mutableStateOf(false) }
     var pins by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) }
     var collapsed by remember { mutableStateOf<Set<Int>>(emptySet()) }
 
-    val parsed by remember(input) { derivedStateOf { parseProgression(input) } }
+    val parsed by remember(tokens) { derivedStateOf { tokens.map { it to parseChord(it) } } }
     val errors by remember(parsed) {
         derivedStateOf { parsed.filter { it.second == null }.map { it.first } }
     }
@@ -141,6 +146,7 @@ fun SongsScreen() {
     val scope = rememberCoroutineScope()
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Box {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -154,21 +160,18 @@ fun SongsScreen() {
                 )
             }
             item {
-                ExampleChips { picked -> input = picked }
-            }
-            item {
-                OutlinedTextField(
-                    value = input,
-                    onValueChange = { input = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Chord progression") },
-                    placeholder = { Text("e.g. C | G | Am | F") },
-                    singleLine = false,
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.None,
-                        autoCorrectEnabled = false
-                    )
+                ChordProgressionField(
+                    tokens = tokens,
+                    editingText = editingText,
+                    examples = EXAMPLES,
+                    onTokensChange = { tokens = it },
+                    onEditingTextChange = { editingText = it },
+                    onChipTap = { i -> pickerTarget = PickerTarget.Edit(i, parseChord(tokens[i])) },
+                    onOpenPicker = { pickerTarget = PickerTarget.Add },
+                    onPickExample = { preset ->
+                        tokens = preset.split(Regex("[|,\\s]+")).filter { it.isNotBlank() }
+                        editingText = ""
+                    },
                 )
             }
             item {
@@ -264,21 +267,29 @@ fun SongsScreen() {
                 }
             }
         }
-    }
-}
 
-@Composable
-private fun ExampleChips(onPick: (String) -> Unit) {
-    val examples = listOf("C | G | Am | F", "F | G | Em | Am", "Asus4 | G7 | Cmaj7 | Am7")
-    Row(
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        examples.forEach { ex ->
-            AssistChip(
-                onClick = { onPick(ex) },
-                label = { Text(ex, maxLines = 1) }
+        val target = pickerTarget
+        if (target != null) {
+            ChordPickerSheet(
+                initial = (target as? PickerTarget.Edit)?.initial,
+                onConfirm = { chord ->
+                    val tok = chordToToken(chord)
+                    tokens = when (target) {
+                        is PickerTarget.Add -> tokens + tok
+                        is PickerTarget.Edit -> tokens.toMutableList().also { it[target.index] = tok }
+                    }
+                    editingText = ""
+                    pickerTarget = null
+                },
+                onDelete = (target as? PickerTarget.Edit)?.let { t ->
+                    {
+                        tokens = tokens.toMutableList().also { it.removeAt(t.index) }
+                        pickerTarget = null
+                    }
+                },
+                onDismiss = { pickerTarget = null },
             )
+        }
         }
     }
 }

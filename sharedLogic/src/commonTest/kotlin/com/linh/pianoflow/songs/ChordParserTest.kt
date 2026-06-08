@@ -59,4 +59,48 @@ class ChordParserTest {
         assertNull(out[1].second)
         assertNotNull(out[2].second)
     }
+
+    @Test
+    fun chordToToken_roundTrips_forEveryRootAndQuality() {
+        for (pc in 0 until 12) {
+            for (q in Quality.entries) {
+                val chord = Chord(pc, q)
+                val token = chordToToken(chord)
+                assertEquals(
+                    chord,
+                    parseChord(token),
+                    "round-trip failed for $token (pc=$pc, q=$q)",
+                )
+            }
+        }
+    }
+
+    @Test
+    fun chordToToken_usesSharpRootsAndPlainMajor() {
+        assertEquals("C", chordToToken(Chord(0, Quality.MAJ)))
+        assertEquals("C#m", chordToToken(Chord(1, Quality.MIN)))
+        assertEquals("Gmaj7", chordToToken(Chord(7, Quality.MAJ7)))
+        assertEquals("Am7b5", chordToToken(Chord(9, Quality.M7B5)))
+    }
+
+    @Test
+    fun normalizeChordToken_capitalizesRecognizedRootOnly() {
+        assertEquals("E", normalizeChordToken("e"))
+        assertEquals("Cmaj7", normalizeChordToken("cmaj7"))
+        assertEquals("Bb7", normalizeChordToken("bb7"))   // flat spelling preserved
+        assertEquals("F#m7", normalizeChordToken("f#m7"))
+        assertEquals("Cm7", normalizeChordToken("cm7"))   // minor 'm' stays lowercase
+    }
+
+    @Test
+    fun normalizeChordToken_leavesUnrecognizedAndEmptyUnchanged() {
+        assertEquals("xyz", normalizeChordToken("xyz"))
+        assertEquals("", normalizeChordToken(""))
+    }
+
+    @Test
+    fun normalizeChordToken_isIdempotentOnCanonical() {
+        assertEquals("E", normalizeChordToken("E"))
+        assertEquals("Am", normalizeChordToken("Am"))
+    }
 }
