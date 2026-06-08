@@ -7,9 +7,9 @@ This is a Kotlin Multiplatform project targeting Android and iOS, organized into
 * [/core/model](./core/model/src) — pure-Kotlin music primitives (`Pitch`, `Chord`, `Quality`).
 * [/core/audio](./core/audio/src) — `TonePlayer` (expect/actual) and `ChordSynth`.
 * [/core/designsystem](./core/designsystem/src) — shared Compose UI (`PianoKeyboard`, theme).
-* [/feature/api/chord-smoother](./feature/api/chord-smoother/src) — public contracts for the "Songs" feature
+* [/feature/chord-smoother/api](./feature/chord-smoother/api/src) — public contracts for the "Songs" feature
   (solver/parser seams, `Voicing`, navigation entry).
-* [/feature/impl/chord-smoother](./feature/impl/chord-smoother/src) — its implementation, in Clean-Arch
+* [/feature/chord-smoother/impl](./feature/chord-smoother/impl/src) — its implementation, in Clean-Arch
   packages (`domain` / `data` / `presentation` / `di`).
 * [/shared](./shared/src) — KMP umbrella that builds the iOS `SharedLogic` framework (exports the core modules).
 * [/androidApp](./androidApp/src) — Android entry point; starts Koin.
@@ -26,7 +26,7 @@ Use the run configurations provided by the run widget in your IDE's toolbar. You
 
 Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
 
-- Domain + UI (Android host): `./gradlew :feature:impl:chord-smoother:testAndroidHostTest :core:designsystem:testAndroidHostTest`
+- Domain + UI (Android host): `./gradlew :feature:chord-smoother:impl:testAndroidHostTest :core:designsystem:testAndroidHostTest`
   - Screenshot goldens verify with `-Proborazzi.test.verify=true`. Inspection-only tests need a `-Proborazzi.test.record=true` pass first on a clean build (see `docs/SCREENSHOT_TESTING.md`).
 - iOS framework link: `./gradlew :shared:linkDebugFrameworkIosSimulatorArm64`
 

@@ -7,8 +7,8 @@ Kotlin Multiplatform (Android + iOS) Compose Multiplatform app, organized into f
 - `:core:model` — pure-Kotlin music primitives (`Pitch`, `Chord`, `Quality`). KMP, iOS-capable.
 - `:core:audio` — `TonePlayer` (expect/actual) + `ChordSynth`. KMP, iOS-capable.
 - `:core:designsystem` — shared Compose UI (`PianoKeyboard`, theme). Android + common.
-- `:feature:api:chord-smoother` — public contracts for the "Songs" feature: `ProgressionSolver`, `ChordProgressionParser`, `Voicing`, `ChordSmootherEntry`. KMP, iOS-capable; no Compose UI.
-- `:feature:impl:chord-smoother` — the implementation, in Clean-Arch packages `domain/` · `data/` (empty until persistence) · `presentation/` (incl. `SongsViewModel`) · `di/` (Koin module). Android + common.
+- `:feature:chord-smoother:api` — public contracts for the "Songs" feature: `ProgressionSolver`, `ChordProgressionParser`, `Voicing`, `ChordSmootherEntry`. KMP, iOS-capable; no Compose UI.
+- `:feature:chord-smoother:impl` — the implementation, in Clean-Arch packages `domain/` · `data/` (empty until persistence) · `presentation/` (incl. `SongsViewModel`) · `di/` (Koin module). Android + common.
 - `:shared` — KMP umbrella that builds the iOS `SharedLogic` framework (exports `:core:model` + `:core:audio`). Holds template `Greeting`/`Platform` (throwaway).
 - `:androidApp` — Android entry point; `PianoFlowApp` starts Koin and registers `chordSmootherModule`; `App()` renders the Koin-injected `ChordSmootherEntry`.
 
@@ -26,12 +26,12 @@ Inspection tests live alongside regression tests in a module's `src/androidHostT
 Run one inspection test and view it:
 
 ```bash
-./gradlew :feature:impl:chord-smoother:testAndroidHostTest \
+./gradlew :feature:chord-smoother:impl:testAndroidHostTest \
   --tests "com.linh.pianoflow.feature.chordsmoother.impl.presentation.SongsScreenInspection.inspect_songsScreen_default" \
   -Proborazzi.test.record=true
 ```
 
-Then `Read feature/impl/chord-smoother/build/outputs/roborazzi/_inspect_songs_screen.png`.
+Then `Read feature/chord-smoother/impl/build/outputs/roborazzi/_inspect_songs_screen.png`.
 
 **Don't delete reusable inspection tests** after running — keep them so future inspections cost one command. New screens get a new `*Inspection` test on first visit.
 
@@ -50,13 +50,13 @@ Full workflow doc: `docs/SCREENSHOT_TESTING.md`. Things easy to trip on:
 ## Build basics
 
 - Android SDKs: `compileSdk = 36`, `minSdk = 24`. AGP 9.0.1, Gradle 9.1, Kotlin 2.4.0, CMP 1.11.1.
-- Type-safe project accessors are enabled: e.g. `projects.core.model`, `projects.feature.impl.chordSmoother`.
+- Type-safe project accessors are enabled: e.g. `projects.core.model`, `projects.feature.chordSmoother.impl`.
 - Library modules use `com.android.kotlin.multiplatform.library` (not the standard `com.android.library`), applied via the convention plugins. Plugin compatibility for that variant is sometimes lagging — check before assuming a plugin attaches cleanly.
 
 ## What lives where
 
 - `core/` — shared primitives: `model` (pitch/chord), `audio` (TonePlayer), `designsystem` (PianoKeyboard, theme).
-- `feature/api/chord-smoother/`, `feature/impl/chord-smoother/` — the "Songs" chord-smoother feature (contracts vs implementation).
+- `feature/chord-smoother/api/`, `feature/chord-smoother/impl/` — the "Songs" chord-smoother feature (contracts vs implementation).
 - `shared/` — KMP umbrella for the iOS framework.
 - `androidApp/` — Android entry point + Koin startup.
 - `iosApp/` — Xcode project (currently the KMP template; real Compose UI is not wired to iOS yet).

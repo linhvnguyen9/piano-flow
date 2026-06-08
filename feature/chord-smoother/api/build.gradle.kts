@@ -5,9 +5,6 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
-        namespace = "com.linh.pianoflow.feature.chordsmoother.api"
-    }
     sourceSets {
         commonMain.dependencies {
             api(projects.core.model)

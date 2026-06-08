@@ -4,9 +4,6 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
-        namespace = "com.linh.pianoflow.core.designsystem"
-    }
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.model)   // PianoKeyboard uses Pitch

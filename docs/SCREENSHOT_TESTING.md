@@ -3,7 +3,7 @@
 Compose modules use [Roborazzi](https://github.com/takahirom/roborazzi) for Compose
 screenshot testing. Tests run on the JVM via Robolectric — no emulator or device
 required. Modules with screenshot tests today: `:core:designsystem` and
-`:feature:impl:chord-smoother`.
+`:feature:chord-smoother:impl`.
 
 ## Where things live (per module)
 
@@ -44,22 +44,22 @@ needed.
 - Record / refresh goldens after an intentional UI change:
 
   ```bash
-  ./gradlew :feature:impl:chord-smoother:testAndroidHostTest -Proborazzi.test.record=true
+  ./gradlew :feature:chord-smoother:impl:testAndroidHostTest -Proborazzi.test.record=true
   ```
 
 - Verify (fail on visual diff — this is the CI command):
 
   ```bash
-  ./gradlew :feature:impl:chord-smoother:testAndroidHostTest -Proborazzi.test.verify=true
+  ./gradlew :feature:chord-smoother:impl:testAndroidHostTest -Proborazzi.test.verify=true
   ```
 
 - Generate a side-by-side compare PNG without failing the build:
 
   ```bash
-  ./gradlew :feature:impl:chord-smoother:testAndroidHostTest -Proborazzi.test.compare=true
+  ./gradlew :feature:chord-smoother:impl:testAndroidHostTest -Proborazzi.test.compare=true
   ```
 
-  Output: `feature/impl/chord-smoother/build/outputs/roborazzi/<test>_compare.png`.
+  Output: `feature/chord-smoother/impl/build/outputs/roborazzi/<test>_compare.png`.
 
 Swap in `:core:designsystem` (or any other screenshot module) as needed.
 

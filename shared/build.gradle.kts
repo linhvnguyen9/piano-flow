@@ -3,9 +3,6 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
-        namespace = "com.linh.pianoflow.shared"
-    }
     listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
         target.binaries.framework {
             baseName = "SharedLogic"   // unchanged so ContentView.swift's import still resolves

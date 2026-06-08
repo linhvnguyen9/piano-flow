@@ -16,14 +16,14 @@ Track upcoming features and bugfixes here. Move items to **Done** when shipped.
 
 ## Next Up (P1)
 
-- [ ] **feature** — Save chord progression (persist user-built progressions; load/edit/delete). Lands in `feature/impl/chord-smoother/.../impl/data/`.
+- [ ] **feature** — Save chord progression (persist user-built progressions; load/edit/delete). Lands in `feature/chord-smoother/impl/.../impl/data/`.
 - [ ] **feature** — Audio playback wiring (`core/audio/.../audio/`, `core/audio/src/iosMain/.../audio/`)
 
 ## Backlog (P2)
 
-- [ ] **feature** — Song library UI polish (`feature/impl/chord-smoother/.../impl/presentation/SongsScreen.kt`)
+- [ ] **feature** — Song library UI polish (`feature/chord-smoother/impl/.../impl/presentation/SongsScreen.kt`)
 - [ ] **refactor** — Review `VoiceLeadingSolver.kt` voicing selection heuristics
-- [ ] **test** — Expand `SolverTest.kt` coverage for edge cases (`feature/impl/chord-smoother/src/commonTest/...`)
+- [ ] **test** — Expand `SolverTest.kt` coverage for edge cases (`feature/chord-smoother/impl/src/commonTest/...`)
 
 ## Nice to Have (P3)
 

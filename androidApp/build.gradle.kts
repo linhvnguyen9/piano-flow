@@ -12,8 +12,8 @@ kotlin {
     }
 }
 dependencies {
-    implementation(projects.feature.api.chordSmoother)
-    implementation(projects.feature.impl.chordSmoother)
+    implementation(projects.feature.chordSmoother.api)
+    implementation(projects.feature.chordSmoother.impl)
 
     implementation(libs.androidx.activity.compose)
 

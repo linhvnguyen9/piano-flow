@@ -20,9 +20,9 @@ Restructure into a feature-oriented graph:
 - **Fine-grained core**: `:core:model` (Pitch/Chord), `:core:audio` (TonePlayer/ChordSynth),
   `:core:designsystem` (PianoKeyboard, theme). Shared primitives, each independently
   buildable.
-- **Per-feature api/impl split**: `:feature:api:chord-smoother` exposes public contracts
+- **Per-feature api/impl split**: `:feature:chord-smoother:api` exposes public contracts
   (the `ProgressionSolver` / `ChordProgressionParser` domain seams, the `Voicing` model,
-  and a `ChordSmootherEntry` navigation seam); `:feature:impl:chord-smoother` holds the
+  and a `ChordSmootherEntry` navigation seam); `:feature:chord-smoother:impl` holds the
   concrete implementation in Clean-Arch packages `domain` / `data` / `presentation` / `di`.
   Other modules depend on **api**; **impl** is private and wired at the app's composition root.
 - **DI via Koin** (constructor DSL), started in `:androidApp`'s `Application`.
