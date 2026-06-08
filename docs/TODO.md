@@ -18,6 +18,7 @@ Track upcoming features and bugfixes here. Move items to **Done** when shipped.
 
 - [ ] **feature** — Save chord progression (persist user-built progressions; load/edit/delete)
 - [ ] **feature** — Audio playback wiring (`sharedLogic/.../audio/`, `sharedLogic/.../iosMain/.../audio/`)
+- [ ] **refactor** — Extract Roborazzi setup from `sharedUI/build.gradle.kts` into a `pianoflow.compose-screenshot-testing` convention plugin in `build-logic/`, reusable when more Compose modules are added
 
 ## Backlog (P2)
 
