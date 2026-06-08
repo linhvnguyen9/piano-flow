@@ -44,11 +44,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.linh.pianoflow.core.designsystem.PianoKeyboard
+import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
 import com.linh.pianoflow.core.model.Chord
 import com.linh.pianoflow.core.model.Pitch
 import com.linh.pianoflow.feature.chordsmoother.api.ChordProgressionParser
@@ -305,7 +305,7 @@ private fun ChordCard(
                     )
                     Text(
                         row.voicing.notes.joinToString("  ") { Pitch.name(it) },
-                        style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
+                        style = PianoFlowTheme.extendedTypography.musicData
                     )
                 }
                 IconButton(onClick = onTap) {

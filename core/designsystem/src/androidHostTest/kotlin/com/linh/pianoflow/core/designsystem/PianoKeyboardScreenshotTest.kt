@@ -1,12 +1,12 @@
 package com.linh.pianoflow.core.designsystem
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,9 +23,16 @@ class PianoKeyboardScreenshotTest {
     val composeRule = createComposeRule()
 
     @Test
-    fun pianoKeyboard_defaultOneOctaveCMajorTriadHighlighted() {
+    fun pianoKeyboard_light_cMajorTriad() =
+        capture(dark = false, golden = "piano_keyboard_default.png")
+
+    @Test
+    fun pianoKeyboard_dark_cMajorTriad() =
+        capture(dark = true, golden = "piano_keyboard_default_dark.png")
+
+    private fun capture(dark: Boolean, golden: String) {
         composeRule.setContent {
-            MaterialTheme {
+            PianoFlowTheme(darkTheme = dark) {
                 Surface {
                     PianoKeyboard(
                         startMidi = 60,
@@ -36,9 +43,8 @@ class PianoKeyboardScreenshotTest {
                 }
             }
         }
-
         composeRule.onRoot().captureRoboImage(
-            filePath = "src/androidHostTest/screenshots/piano_keyboard_default.png",
+            filePath = "src/androidHostTest/screenshots/$golden",
         )
     }
 }

@@ -32,6 +32,7 @@ import com.linh.pianoflow.core.model.Quality
 import com.linh.pianoflow.feature.chordsmoother.impl.domain.candidates
 import com.linh.pianoflow.feature.chordsmoother.impl.domain.keyboardRange
 import com.linh.pianoflow.core.designsystem.PianoKeyboard
+import com.linh.pianoflow.core.designsystem.theme.Pill
 
 private val QUALITY_GROUPS: List<Pair<String, List<Pair<Quality, String>>>> = listOf(
     "Triads" to listOf(
@@ -116,7 +117,7 @@ fun ChordPickerContent(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Pitch.NAMES.forEachIndexed { pc, name ->
-                FilterChip(selected = pc == rootPc, onClick = { rootPc = pc }, label = { Text(name) })
+                FilterChip(selected = pc == rootPc, onClick = { rootPc = pc }, label = { Text(name) }, shape = Pill)
             }
         }
 
@@ -133,7 +134,7 @@ fun ChordPickerContent(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     items.forEach { (q, label) ->
-                        FilterChip(selected = q == quality, onClick = { quality = q }, label = { Text(label) })
+                        FilterChip(selected = q == quality, onClick = { quality = q }, label = { Text(label) }, shape = Pill)
                     }
                 }
             }

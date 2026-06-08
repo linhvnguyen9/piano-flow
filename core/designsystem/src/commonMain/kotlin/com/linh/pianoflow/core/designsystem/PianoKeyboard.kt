@@ -20,9 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.linh.pianoflow.core.designsystem.theme.PianoBlackKey
+import com.linh.pianoflow.core.designsystem.theme.PianoKeyLabel
+import com.linh.pianoflow.core.designsystem.theme.PianoKeyOutline
+import com.linh.pianoflow.core.designsystem.theme.PianoWhiteKey
 import com.linh.pianoflow.core.model.Pitch
 
 @Composable
@@ -35,11 +38,11 @@ fun PianoKeyboard(
     onKeyTap: ((Int) -> Unit)? = null,
 ) {
     val whiteLit = MaterialTheme.colorScheme.primaryContainer
-    val whiteBg = MaterialTheme.colorScheme.surface
+    val whiteBg = PianoWhiteKey
     val blackLit = MaterialTheme.colorScheme.primary
-    val blackBg = Color(0xFF1C1C1C)
-    val borderColor = MaterialTheme.colorScheme.outlineVariant
-    val whiteText = MaterialTheme.colorScheme.onSurfaceVariant
+    val blackBg = PianoBlackKey
+    val borderColor = PianoKeyOutline
+    val whiteText = PianoKeyLabel
 
     BoxWithConstraints(modifier.height(120.dp)) {
         val whites = (startMidi..endMidi).filter { Pitch.isWhite(it) }

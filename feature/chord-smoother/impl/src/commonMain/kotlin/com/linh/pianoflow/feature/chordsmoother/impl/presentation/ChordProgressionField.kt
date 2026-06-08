@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.linh.pianoflow.core.designsystem.theme.Pill
 import com.linh.pianoflow.feature.chordsmoother.impl.presentation.consumeTokens
 import com.linh.pianoflow.feature.chordsmoother.impl.domain.normalizeChordToken
 
@@ -152,7 +153,7 @@ fun ChordProgressionField(
             Spacer(Modifier.height(4.dp))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 examples.forEach { ex ->
-                    AssistChip(onClick = { onPickExample(ex) }, label = { Text(ex) })
+                    AssistChip(onClick = { onPickExample(ex) }, label = { Text(ex) }, shape = Pill)
                 }
             }
         }
@@ -162,7 +163,7 @@ fun ChordProgressionField(
 @Composable
 private fun ChordChip(label: String, onClick: () -> Unit) {
     Surface(
-        shape = RoundedCornerShape(10.dp),
+        shape = Pill,
         color = MaterialTheme.colorScheme.primaryContainer,
         modifier = Modifier.clickable(onClick = onClick),
     ) {
