@@ -1,10 +1,10 @@
 package com.linh.pianoflow.feature.chordsmoother.impl.presentation
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
 import com.linh.pianoflow.feature.chordsmoother.impl.domain.DefaultChordProgressionParser
 import com.linh.pianoflow.feature.chordsmoother.impl.domain.DefaultProgressionSolver
 import com.linh.pianoflow.feature.chordsmoother.impl.domain.candidates
@@ -43,7 +43,7 @@ class SongsScreenInspection {
     @Test
     fun inspect_songsScreen_default() {
         composeRule.setContent {
-            MaterialTheme { SampleSongsScreen() }
+            PianoFlowTheme { SampleSongsScreen() }
         }
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage(
@@ -60,7 +60,7 @@ class SongsScreenInspection {
     @Config(qualifiers = "w360dp-h2000dp-xxhdpi", sdk = [35])
     fun inspect_songsScreen_fullProgression() {
         composeRule.setContent {
-            MaterialTheme { SampleSongsScreen() }
+            PianoFlowTheme { SampleSongsScreen() }
         }
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage(
