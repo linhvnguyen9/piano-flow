@@ -13,19 +13,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -41,19 +50,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.linh.pianoflow.audio.TonePlayer
 import com.linh.pianoflow.songs.Chord
 import com.linh.pianoflow.songs.Pitch
 import com.linh.pianoflow.songs.Voicing
 import com.linh.pianoflow.songs.candidates
+import com.linh.pianoflow.songs.chordToToken
 import com.linh.pianoflow.songs.inversionName
 import com.linh.pianoflow.songs.keyboardRange
 import com.linh.pianoflow.songs.moveCost
-import com.linh.pianoflow.songs.parseProgression
+import com.linh.pianoflow.songs.parseChord
 import com.linh.pianoflow.songs.rootBaseline
 import com.linh.pianoflow.songs.solve
 import com.linh.pianoflow.songs.totalMovement
@@ -63,6 +73,13 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 private const val PLAY_STEP_MS = 750L
+
+private val EXAMPLES = listOf("C | G | Am | F", "F | G | Em | Am", "Asus4 | G7 | Cmaj7 | Am7")
+
+private sealed interface PickerTarget {
+    data object Add : PickerTarget
+    data class Edit(val index: Int, val initial: Chord?) : PickerTarget
+}
 
 private data class ChordRow(
     val label: String,
@@ -76,14 +93,16 @@ private data class ChordRow(
 
 @Composable
 fun SongsScreen() {
-    var input by remember { mutableStateOf("C | G | Am | F") }
+    var tokens by remember { mutableStateOf(listOf("C", "G", "Am", "F")) }
+    var editingText by remember { mutableStateOf("") }
+    var pickerTarget by remember { mutableStateOf<PickerTarget?>(null) }
     var anchor by remember { mutableStateOf(true) }
     var activeRow by remember { mutableStateOf<Int?>(null) }
     var isPlaying by remember { mutableStateOf(false) }
     var pins by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) }
     var collapsed by remember { mutableStateOf<Set<Int>>(emptySet()) }
 
-    val parsed by remember(input) { derivedStateOf { parseProgression(input) } }
+    val parsed by remember(tokens) { derivedStateOf { tokens.map { it to parseChord(it) } } }
     val errors by remember(parsed) {
         derivedStateOf { parsed.filter { it.second == null }.map { it.first } }
     }
@@ -127,6 +146,7 @@ fun SongsScreen() {
     val scope = rememberCoroutineScope()
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Box {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -140,21 +160,18 @@ fun SongsScreen() {
                 )
             }
             item {
-                ExampleChips { picked -> input = picked }
-            }
-            item {
-                OutlinedTextField(
-                    value = input,
-                    onValueChange = { input = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Chord progression") },
-                    placeholder = { Text("e.g. C | G | Am | F") },
-                    singleLine = false,
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.None,
-                        autoCorrectEnabled = false
-                    )
+                ChordProgressionField(
+                    tokens = tokens,
+                    editingText = editingText,
+                    examples = EXAMPLES,
+                    onTokensChange = { tokens = it },
+                    onEditingTextChange = { editingText = it },
+                    onChipTap = { i -> pickerTarget = PickerTarget.Edit(i, parseChord(tokens[i])) },
+                    onOpenPicker = { pickerTarget = PickerTarget.Add },
+                    onPickExample = { preset ->
+                        tokens = preset.split(Regex("[|,\\s]+")).filter { it.isNotBlank() }
+                        editingText = ""
+                    },
                 )
             }
             item {
@@ -182,7 +199,19 @@ fun SongsScreen() {
                                 }
                             }
                         }
-                    ) { Text(if (isPlaying) "Playing…" else "▶ Play") }
+                    ) {
+                        if (isPlaying) {
+                            Text("Playing…")
+                        } else {
+                            Icon(
+                                Icons.Filled.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier.size(ButtonDefaults.IconSize)
+                            )
+                            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                            Text("Play")
+                        }
+                    }
                 }
             }
 
@@ -238,15 +267,29 @@ fun SongsScreen() {
                 }
             }
         }
-    }
-}
 
-@Composable
-private fun ExampleChips(onPick: (String) -> Unit) {
-    val examples = listOf("C | G | Am | F", "F | G | Em | Am", "Asus4 | G7 | Cmaj7 | Am7")
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        examples.forEach { ex ->
-            AssistChip(onClick = { onPick(ex) }, label = { Text(ex) })
+        val target = pickerTarget
+        if (target != null) {
+            ChordPickerSheet(
+                initial = (target as? PickerTarget.Edit)?.initial,
+                onConfirm = { chord ->
+                    val tok = chordToToken(chord)
+                    tokens = when (target) {
+                        is PickerTarget.Add -> tokens + tok
+                        is PickerTarget.Edit -> tokens.toMutableList().also { it[target.index] = tok }
+                    }
+                    editingText = ""
+                    pickerTarget = null
+                },
+                onDelete = (target as? PickerTarget.Edit)?.let { t ->
+                    {
+                        tokens = tokens.toMutableList().also { it.removeAt(t.index) }
+                        pickerTarget = null
+                    }
+                },
+                onDismiss = { pickerTarget = null },
+            )
+        }
         }
     }
 }
@@ -305,7 +348,7 @@ private fun ChordCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .clickable { onTap() },
+            .clickable { onToggleCollapse() },
         colors = CardDefaults.cardColors(containerColor = bg)
     ) {
         Column(Modifier.padding(12.dp)) {
@@ -329,6 +372,13 @@ private fun ChordCard(
                     Text(
                         row.voicing.notes.joinToString("  ") { Pitch.name(it) },
                         style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
+                    )
+                }
+                IconButton(onClick = onTap) {
+                    Icon(
+                        Icons.Filled.PlayArrow,
+                        contentDescription = "Play chord",
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 CollapseToggle(collapsed = keyboardCollapsed, onClick = onToggleCollapse)
@@ -357,21 +407,12 @@ private fun ChordCard(
 
 @Composable
 private fun CollapseToggle(collapsed: Boolean, onClick: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
-            .height(32.dp)
-            .width(36.dp)
-            .clickable { onClick() }
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = if (collapsed) "⌄" else "⌃",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = if (collapsed) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
+            contentDescription = if (collapsed) "Expand keyboard" else "Collapse keyboard",
+            tint = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -389,13 +430,23 @@ private fun InversionPicker(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        StepButton(text = "‹", enabled = enabled, onClick = onPrev)
+        StepButton(
+            icon = Icons.Filled.KeyboardArrowLeft,
+            contentDescription = "Previous voicing",
+            enabled = enabled,
+            onClick = onPrev
+        )
         Text(
             "voicing $positionLabel",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        StepButton(text = "›", enabled = enabled, onClick = onNext)
+        StepButton(
+            icon = Icons.Filled.KeyboardArrowRight,
+            contentDescription = "Next voicing",
+            enabled = enabled,
+            onClick = onNext
+        )
         Spacer(Modifier.width(4.dp))
         AssistChip(
             onClick = onAuto,
@@ -406,19 +457,19 @@ private fun InversionPicker(
 }
 
 @Composable
-private fun StepButton(text: String, enabled: Boolean, onClick: () -> Unit) {
-    val color = if (enabled) MaterialTheme.colorScheme.primary
-    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
-            .height(32.dp)
-            .width(36.dp)
-            .clickable(enabled = enabled) { onClick() }
+private fun StepButton(
+    icon: ImageVector,
+    contentDescription: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    IconButton(
+        onClick = onClick,
+        enabled = enabled,
+        colors = IconButtonDefaults.iconButtonColors(
+            contentColor = MaterialTheme.colorScheme.primary
+        )
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(text, color = color, style = MaterialTheme.typography.titleMedium)
-        }
+        Icon(imageVector = icon, contentDescription = contentDescription)
     }
 }

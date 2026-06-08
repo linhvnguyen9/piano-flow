@@ -29,3 +29,35 @@ fun parseChord(tok: String): Chord? {
 
 fun parseProgression(s: String): List<Pair<String, Chord?>> =
     s.split(Regex("[|,\\s]+")).filter { it.isNotBlank() }.map { it to parseChord(it) }
+
+private fun tokenSuffix(q: Quality): String = when (q) {
+    Quality.MAJ -> ""
+    Quality.MIN -> "m"
+    Quality.DIM -> "dim"
+    Quality.AUG -> "aug"
+    Quality.SUS2 -> "sus2"
+    Quality.SUS4 -> "sus4"
+    Quality.DOM7 -> "7"
+    Quality.MAJ7 -> "maj7"
+    Quality.MIN7 -> "m7"
+    Quality.DIM7 -> "dim7"
+    Quality.M7B5 -> "m7b5"
+    Quality.MAJ6 -> "6"
+    Quality.MIN6 -> "m6"
+}
+
+/** Inverse of [parseChord]: a canonical, parser-safe token using sharp roots. */
+fun chordToToken(chord: Chord): String = Pitch.NAMES[chord.rootPc] + tokenSuffix(chord.quality)
+
+/**
+ * Capitalizes the root letter of a recognized chord token (e.g. "e" -> "E",
+ * "cmaj7" -> "Cmaj7"). The accidental, quality suffix, and any unrecognized token
+ * are left untouched, so flat spelling ("bb7") and the minor/major case
+ * distinction ("cm7" vs "cM7") are preserved.
+ */
+fun normalizeChordToken(token: String): String =
+    if (token.isNotEmpty() && parseChord(token) != null) {
+        token.replaceFirstChar { it.uppercaseChar() }
+    } else {
+        token
+    }
