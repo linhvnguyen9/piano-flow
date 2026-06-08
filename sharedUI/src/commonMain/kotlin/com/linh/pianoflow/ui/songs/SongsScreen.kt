@@ -3,6 +3,8 @@ package com.linh.pianoflow.ui.songs
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,17 +15,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -41,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -182,7 +196,19 @@ fun SongsScreen() {
                                 }
                             }
                         }
-                    ) { Text(if (isPlaying) "Playing…" else "▶ Play") }
+                    ) {
+                        if (isPlaying) {
+                            Text("Playing…")
+                        } else {
+                            Icon(
+                                Icons.Filled.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier.size(ButtonDefaults.IconSize)
+                            )
+                            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                            Text("Play")
+                        }
+                    }
                 }
             }
 
@@ -244,9 +270,15 @@ fun SongsScreen() {
 @Composable
 private fun ExampleChips(onPick: (String) -> Unit) {
     val examples = listOf("C | G | Am | F", "F | G | Em | Am", "Asus4 | G7 | Cmaj7 | Am7")
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         examples.forEach { ex ->
-            AssistChip(onClick = { onPick(ex) }, label = { Text(ex) })
+            AssistChip(
+                onClick = { onPick(ex) },
+                label = { Text(ex, maxLines = 1) }
+            )
         }
     }
 }
@@ -357,21 +389,12 @@ private fun ChordCard(
 
 @Composable
 private fun CollapseToggle(collapsed: Boolean, onClick: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
-            .height(32.dp)
-            .width(36.dp)
-            .clickable { onClick() }
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = if (collapsed) "⌄" else "⌃",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = if (collapsed) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
+            contentDescription = if (collapsed) "Expand keyboard" else "Collapse keyboard",
+            tint = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -389,13 +412,23 @@ private fun InversionPicker(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        StepButton(text = "‹", enabled = enabled, onClick = onPrev)
+        StepButton(
+            icon = Icons.Filled.KeyboardArrowLeft,
+            contentDescription = "Previous voicing",
+            enabled = enabled,
+            onClick = onPrev
+        )
         Text(
             "voicing $positionLabel",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        StepButton(text = "›", enabled = enabled, onClick = onNext)
+        StepButton(
+            icon = Icons.Filled.KeyboardArrowRight,
+            contentDescription = "Next voicing",
+            enabled = enabled,
+            onClick = onNext
+        )
         Spacer(Modifier.width(4.dp))
         AssistChip(
             onClick = onAuto,
@@ -406,19 +439,19 @@ private fun InversionPicker(
 }
 
 @Composable
-private fun StepButton(text: String, enabled: Boolean, onClick: () -> Unit) {
-    val color = if (enabled) MaterialTheme.colorScheme.primary
-    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
-            .height(32.dp)
-            .width(36.dp)
-            .clickable(enabled = enabled) { onClick() }
+private fun StepButton(
+    icon: ImageVector,
+    contentDescription: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    IconButton(
+        onClick = onClick,
+        enabled = enabled,
+        colors = IconButtonDefaults.iconButtonColors(
+            contentColor = MaterialTheme.colorScheme.primary
+        )
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(text, color = color, style = MaterialTheme.typography.titleMedium)
-        }
+        Icon(imageVector = icon, contentDescription = contentDescription)
     }
 }

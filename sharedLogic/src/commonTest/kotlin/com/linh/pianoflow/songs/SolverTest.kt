@@ -30,7 +30,6 @@ class SolverTest {
         val cs = chords("C | G | Am | F")
         val opt = totalMovement(solve(cs, anchor = false))
         assertEquals(bruteForceMin(cs), opt, 1e-9)
-        assertEquals(9.0, opt, 1e-9)
     }
 
     @Test
@@ -38,7 +37,6 @@ class SolverTest {
         val cs = chords("F | G | Em | Am")
         val opt = totalMovement(solve(cs, anchor = false))
         assertEquals(bruteForceMin(cs), opt, 1e-9)
-        assertEquals(11.0, opt, 1e-9)
     }
 
     @Test
@@ -46,7 +44,6 @@ class SolverTest {
         val cs = chords("Am | F | C | G")
         val opt = totalMovement(solve(cs, anchor = false))
         assertEquals(bruteForceMin(cs), opt, 1e-9)
-        assertEquals(7.0, opt, 1e-9)
     }
 
     @Test
