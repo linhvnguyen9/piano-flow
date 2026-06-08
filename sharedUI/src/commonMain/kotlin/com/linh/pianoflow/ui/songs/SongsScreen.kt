@@ -55,8 +55,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.linh.pianoflow.audio.TonePlayer
-import com.linh.pianoflow.songs.Chord
-import com.linh.pianoflow.songs.Pitch
+import com.linh.pianoflow.core.model.Chord
+import com.linh.pianoflow.core.model.Pitch
 import com.linh.pianoflow.songs.Voicing
 import com.linh.pianoflow.songs.candidates
 import com.linh.pianoflow.songs.chordToToken
@@ -67,7 +67,7 @@ import com.linh.pianoflow.songs.parseChord
 import com.linh.pianoflow.songs.rootBaseline
 import com.linh.pianoflow.songs.solve
 import com.linh.pianoflow.songs.totalMovement
-import com.linh.pianoflow.ui.PianoKeyboard
+import com.linh.pianoflow.core.designsystem.PianoKeyboard
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt

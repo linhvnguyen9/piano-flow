@@ -9,7 +9,10 @@ kotlin {
     }
     sourceSets {
         commonMain.dependencies {
-            api(projects.sharedLogic)
+            api(projects.shared)
+            implementation(projects.core.model)
+            implementation(projects.core.audio)
+            implementation(projects.core.designsystem)
         }
     }
 }

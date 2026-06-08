@@ -26,12 +26,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.linh.pianoflow.songs.Chord
-import com.linh.pianoflow.songs.Pitch
-import com.linh.pianoflow.songs.Quality
+import com.linh.pianoflow.core.model.Chord
+import com.linh.pianoflow.core.model.Pitch
+import com.linh.pianoflow.core.model.Quality
 import com.linh.pianoflow.songs.candidates
 import com.linh.pianoflow.songs.keyboardRange
-import com.linh.pianoflow.ui.PianoKeyboard
+import com.linh.pianoflow.core.designsystem.PianoKeyboard
 
 private val QUALITY_GROUPS: List<Pair<String, List<Pair<Quality, String>>>> = listOf(
     "Triads" to listOf(
