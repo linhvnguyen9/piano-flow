@@ -41,15 +41,12 @@ class SongsScreenInspection {
     val composeRule = createComposeRule()
 
     @Test
-    fun inspect_songsScreen_default() {
-        composeRule.setContent {
-            PianoFlowTheme { SampleSongsScreen() }
-        }
-        composeRule.waitForIdle()
-        composeRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/_inspect_songs_screen.png",
-        )
-    }
+    fun inspect_songsScreen_default_light() =
+        capture(dark = false, name = "_inspect_songs_screen.png")
+
+    @Test
+    fun inspect_songsScreen_default_dark() =
+        capture(dark = true, name = "_inspect_songs_screen_dark.png")
 
     /**
      * Tall canvas variant: makes the viewport taller than any reasonable
@@ -58,13 +55,21 @@ class SongsScreenInspection {
      */
     @Test
     @Config(qualifiers = "w360dp-h2000dp-xxhdpi", sdk = [35])
-    fun inspect_songsScreen_fullProgression() {
+    fun inspect_songsScreen_fullProgression_light() =
+        capture(dark = false, name = "_inspect_songs_screen_full.png")
+
+    @Test
+    @Config(qualifiers = "w360dp-h2000dp-xxhdpi", sdk = [35])
+    fun inspect_songsScreen_fullProgression_dark() =
+        capture(dark = true, name = "_inspect_songs_screen_full_dark.png")
+
+    private fun capture(dark: Boolean, name: String) {
         composeRule.setContent {
-            PianoFlowTheme { SampleSongsScreen() }
+            PianoFlowTheme(darkTheme = dark) { SampleSongsScreen() }
         }
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/_inspect_songs_screen_full.png",
+            filePath = "build/outputs/roborazzi/$name",
         )
     }
 }

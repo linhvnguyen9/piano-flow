@@ -118,5 +118,16 @@ val SereneDarkColorScheme = darkColorScheme(
     onTertiaryFixedVariant = OnTertiaryFixedVariant,
 )
 
+// --- Piano key palette -----------------------------------------------------
+// A piano is white-and-black in either app theme, so the base key fills are
+// theme-independent (DESIGN.md: white = "off-white fill", black = "dark ink").
+// Only the *active* highlight is theme-driven (primary), so a lit note pops in
+// both modes.
+/** Off-white fill for natural (white) keys — constant across light/dark. */
+val PianoWhiteKey = Color(0xFFF9F9F8)
 /** "Dark Ink" fill for black piano keys — constant across light/dark. */
 val PianoBlackKey = Color(0xFF1C1C1C)
+/** Dark-ink label text drawn on white keys — constant across light/dark. */
+val PianoKeyLabel = Color(0xFF414848)
+/** Subtle edge stroke that defines white-key boundaries in both modes. */
+val PianoKeyOutline = Color(0xFFC0C8C7)
