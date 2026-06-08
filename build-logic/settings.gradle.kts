@@ -1,8 +1,4 @@
-rootProject.name = "PianoFlow"
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
 pluginManagement {
-    includeBuild("build-logic")
     repositories {
         google {
             mavenContent {
@@ -26,9 +22,14 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        gradlePluginPortal()
+    }
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
     }
 }
 
-include(":androidApp")
-include(":sharedLogic")
-include(":sharedUI")
+rootProject.name = "build-logic"
+include(":convention")

@@ -11,6 +11,25 @@ required.
 - Diff reports: `build/outputs/roborazzi/*_compare.png` (generated on a failing
   verify run)
 
+## How the setup is wired
+
+The Roborazzi wiring (the plugin, the `androidHostTest` test dependencies, the
+Compose UI-tooling runtime dependency, the golden output directory, and the
+`-Proborazzi.test.*` mode plumbing) lives in the `pianoflow.compose-screenshot-testing`
+convention plugin under `build-logic/convention/`, not in this module's
+`build.gradle.kts`. This module just opts in:
+
+```kotlin
+plugins {
+    // ...the Kotlin Multiplatform / Android library / Compose plugins...
+    id("pianoflow.compose-screenshot-testing")
+}
+```
+
+To enable screenshot testing in another Compose module, apply that one plugin id
+(last, after the KMP/Android/Compose plugins it builds on) and put goldens under the
+module's own `src/androidHostTest/screenshots/`.
+
 ## Commands
 
 The Roborazzi gradle plugin does not currently auto-wire its lifecycle tasks
