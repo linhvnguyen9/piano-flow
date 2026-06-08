@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.roborazzi)
+    alias(libs.plugins.pianoflow.composeScreenshotTesting)
 }
 
 kotlin {
@@ -44,37 +44,5 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
-        getByName("androidHostTest").dependencies {
-            implementation(libs.junit)
-            implementation(libs.kotlin.testJunit)
-            implementation(libs.robolectric)
-            implementation(libs.androidx.compose.ui.testJunit4)
-            implementation(libs.androidx.compose.ui.testManifest)
-            implementation(libs.roborazzi)
-            implementation(libs.roborazzi.compose)
-            implementation(libs.roborazzi.junit.rule)
-        }
     }
-}
-
-dependencies {
-    androidRuntimeClasspath(libs.compose.uiTooling)
-}
-
-roborazzi {
-    outputDir.set(layout.projectDirectory.dir("src/androidHostTest/screenshots"))
-}
-
-tasks.withType<Test>().configureEach {
-    val record = project.findProperty("roborazzi.test.record")?.toString() ?: "false"
-    val verify = project.findProperty("roborazzi.test.verify")?.toString() ?: "false"
-    val compare = project.findProperty("roborazzi.test.compare")?.toString() ?: "false"
-
-    systemProperty("roborazzi.test.record", record)
-    systemProperty("roborazzi.test.verify", verify)
-    systemProperty("roborazzi.test.compare", compare)
-
-    inputs.property("roborazzi.test.record", record)
-    inputs.property("roborazzi.test.verify", verify)
-    inputs.property("roborazzi.test.compare", compare)
 }
