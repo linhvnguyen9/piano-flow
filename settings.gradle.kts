@@ -30,5 +30,9 @@ dependencyResolutionManagement {
 }
 
 include(":androidApp")
-include(":sharedLogic")
-include(":sharedUI")
+include(":shared")
+include(":core:model")
+include(":core:audio")
+include(":core:designsystem")
+include(":feature:chord-smoother:api")
+include(":feature:chord-smoother:impl")
