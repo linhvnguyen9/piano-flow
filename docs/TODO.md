@@ -16,14 +16,14 @@ Track upcoming features and bugfixes here. Move items to **Done** when shipped.
 
 ## Next Up (P1)
 
-- [ ] **feature** — Save chord progression (persist user-built progressions; load/edit/delete)
-- [ ] **feature** — Audio playback wiring (`sharedLogic/.../audio/`, `sharedLogic/.../iosMain/.../audio/`)
+- [ ] **feature** — Save chord progression (persist user-built progressions; load/edit/delete). Lands in `feature/impl/chord-smoother/.../impl/data/`.
+- [ ] **feature** — Audio playback wiring (`core/audio/.../audio/`, `core/audio/src/iosMain/.../audio/`)
 
 ## Backlog (P2)
 
-- [ ] **feature** — Song library UI polish (`sharedUI/.../ui/songs/SongsScreen.kt`)
-- [ ] **refactor** — Review `Solver.kt` voicing selection heuristics
-- [ ] **test** — Expand `SolverTest.kt` coverage for edge cases
+- [ ] **feature** — Song library UI polish (`feature/impl/chord-smoother/.../impl/presentation/SongsScreen.kt`)
+- [ ] **refactor** — Review `VoiceLeadingSolver.kt` voicing selection heuristics
+- [ ] **test** — Expand `SolverTest.kt` coverage for edge cases (`feature/impl/chord-smoother/src/commonTest/...`)
 
 ## Nice to Have (P3)
 
@@ -38,3 +38,4 @@ Track upcoming features and bugfixes here. Move items to **Done** when shipped.
 ## Done
 
 - [x] Initial project scaffold
+- [x] **refactor** — Multi-module + Clean Architecture restructure (`:core:*`, `:feature:api/impl:chord-smoother`, `:shared` umbrella, Koin DI, convention plugins). See ADR-0005.
