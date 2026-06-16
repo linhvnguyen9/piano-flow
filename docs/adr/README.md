@@ -13,6 +13,7 @@ that supersedes the old one (and set the old one's status to `Superseded by ADR-
 | [0003](0003-golden-images-committed-to-git.md) | Golden images checked into git | Accepted |
 | [0004](0004-robolectric-sdk-pin.md) | Pin Robolectric to SDK 35 while compileSdk is 36 | Accepted |
 | [0005](0005-feature-module-architecture.md) | Feature-module architecture (api/impl + fine-grained core + Koin) | Accepted |
+| [0006](0006-showkase-roborazzi-component-catalog.md) | Showkase + Roborazzi component catalog (debug browser + committed screenshots) | Accepted |
 
 The fuller rationale and implementation detail behind ADRs 0001–0004 lives in
 [`../superpowers/specs/2026-06-07-compose-screenshot-testing-design.md`](../superpowers/specs/2026-06-07-compose-screenshot-testing-design.md).
