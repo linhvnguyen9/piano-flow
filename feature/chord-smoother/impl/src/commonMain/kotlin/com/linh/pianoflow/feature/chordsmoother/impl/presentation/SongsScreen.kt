@@ -1,7 +1,7 @@
 package com.linh.pianoflow.feature.chordsmoother.impl.presentation
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,8 +26,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -44,16 +42,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.linh.pianoflow.core.designsystem.PianoKeyboard
+import com.linh.pianoflow.core.designsystem.theme.Pill
 import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
 import com.linh.pianoflow.core.model.Chord
 import com.linh.pianoflow.core.model.Pitch
+import com.linh.pianoflow.core.model.Quality
 import com.linh.pianoflow.feature.chordsmoother.api.ChordProgressionParser
 import com.linh.pianoflow.feature.chordsmoother.impl.domain.chordToToken
-import com.linh.pianoflow.feature.chordsmoother.impl.domain.inversionName
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
@@ -113,17 +118,20 @@ fun SongsScreenContent(
         Box {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
                 item {
                     Text(
-                        "Songs — Chord Smoother",
+                        "Chord Smoother",
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.SemiBold
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 item {
+                    // Typeable chord field is retained from the previous design.
                     ChordProgressionField(
                         tokens = state.tokens,
                         editingText = state.editingText,
@@ -136,30 +144,28 @@ fun SongsScreenContent(
                     )
                 }
                 item {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    Button(
+                        onClick = onPlay,
+                        enabled = !state.isPlaying && state.rows.isNotEmpty(),
+                        shape = Pill,
+                        modifier = Modifier.fillMaxWidth().height(56.dp)
                     ) {
-                        Switch(checked = state.anchor, onCheckedChange = onAnchorChange)
-                        Text("Anchor register", style = MaterialTheme.typography.bodyMedium)
-                        Spacer(Modifier.width(8.dp))
-                        Button(
-                            enabled = !state.isPlaying && state.rows.isNotEmpty(),
-                            onClick = onPlay
-                        ) {
-                            if (state.isPlaying) {
-                                Text("Playing…")
-                            } else {
-                                Icon(
-                                    Icons.Filled.PlayArrow,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(ButtonDefaults.IconSize)
-                                )
-                                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                                Text("Play")
-                            }
+                        if (state.isPlaying) {
+                            Text("Playing…", style = MaterialTheme.typography.headlineSmall)
+                        } else {
+                            Icon(
+                                Icons.Filled.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier.size(28.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text("Play Progression", style = MaterialTheme.typography.headlineSmall)
                         }
                     }
+                }
+
+                item {
+                    MovementSummary(state.rows.size, state.totalMovement, state.baselineMovement)
                 }
 
                 if (state.errors.isNotEmpty()) {
@@ -167,19 +173,38 @@ fun SongsScreenContent(
                         Text(
                             "Couldn't read: " + state.errors.joinToString(", "),
                             color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
 
-                item {
-                    SummaryLine(state.rows.size, state.totalMovement, state.baselineMovement)
+                if (state.rows.isNotEmpty()) {
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Anchor register",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Switch(checked = state.anchor, onCheckedChange = onAnchorChange)
+                        }
+                    }
                 }
 
                 itemsIndexed(state.rows, key = { i, _ -> i }) { index, row ->
                     Column {
                         if (index > 0) {
-                            ConnectorPill(row.moveFromPrev ?: 0.0)
+                            // The LazyColumn's 32dp item gap sits above this connector;
+                            // match it below so the pill reads centered in the card seam.
+                            ConnectorPill(row.moveFromPrev ?: 0.0, showCaption = index == 1)
+                            Spacer(Modifier.height(32.dp))
                         }
                         ChordCard(
                             row = row,
@@ -229,33 +254,116 @@ fun SongsScreenContent(
 }
 
 @Composable
-private fun SummaryLine(rowCount: Int, optimized: Double, baseline: Double) {
-    val text = when {
-        rowCount == 0 -> "Type a progression to begin."
-        rowCount == 1 -> "Nothing to smooth yet — add another chord."
-        else -> "Hand movement: ${optimized.roundToInt()} semitones — " +
-            "root-only would be ${baseline.roundToInt()}."
+private fun MovementSummary(rowCount: Int, optimized: Double, baseline: Double) {
+    if (rowCount < 2) {
+        val text = if (rowCount == 0) "Type a progression to begin."
+        else "Nothing to smooth yet — add another chord."
+        Text(
+            text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        return
     }
-    Text(text, style = MaterialTheme.typography.bodyMedium)
+    val opt = optimized.roundToInt()
+    val base = baseline.roundToInt()
+    val saved = base - opt
+    val improved = saved > 0
+    val percent = if (base > 0) (saved * 100 / base) else 0
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Warm Honey Amber in both modes via the mode-independent fixed tokens.
+        Surface(
+            shape = Pill,
+            color = MaterialTheme.colorScheme.secondaryFixedDim,
+            shadowElevation = 1.dp,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    "$opt",
+                    style = PianoFlowTheme.extendedTypography.musicData,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSecondaryFixed
+                )
+                Text(
+                    " semitones",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryFixed
+                )
+                if (improved) {
+                    Text(
+                        "  ·  down from ",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryFixed
+                    )
+                    Text(
+                        "$base",
+                        style = PianoFlowTheme.extendedTypography.musicData,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSecondaryFixed
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            when {
+                improved && percent > 0 -> "Saved $saved semitones — $percent% less hand movement"
+                improved -> "Saved $saved semitones of hand movement"
+                else -> "Already as smooth as it gets — no extra movement to trim"
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
-private fun ConnectorPill(move: Double) {
-    Box(
-        modifier = Modifier
-            .padding(vertical = 4.dp)
-            .fillMaxWidth(),
-        contentAlignment = Alignment.Center
+private fun ConnectorPill(move: Double, showCaption: Boolean) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Honey Amber connector, mode-independent so it stays warm in dark mode.
         Surface(
-            shape = RoundedCornerShape(50),
-            color = MaterialTheme.colorScheme.secondaryContainer
+            shape = Pill,
+            color = MaterialTheme.colorScheme.secondaryFixedDim
         ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    "↓ ${move.roundToInt()} semitones",
+                    style = PianoFlowTheme.extendedTypography.musicData,
+                    color = MaterialTheme.colorScheme.onSecondaryFixed,
+                )
+                // Subtle qualifier so the hop reads as the optimized result.
+                Text(
+                    " · smoothed",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryFixed.copy(alpha = 0.7f),
+                )
+            }
+        }
+        // One-time, calm caption near the first connector only.
+        if (showCaption) {
+            Spacer(Modifier.height(6.dp))
             Text(
-                "↓ ${move.roundToInt()} semitones",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                "Smallest hand move between chords",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
             )
         }
     }
@@ -274,68 +382,109 @@ private fun ChordCard(
     onNext: () -> Unit,
     onAuto: () -> Unit,
 ) {
-    val targetColor = if (active) MaterialTheme.colorScheme.primaryContainer
-    else MaterialTheme.colorScheme.surfaceVariant
-    val bg by animateColorAsState(targetColor)
+    // Active rows lift via soft elevation + a subtle tonal shift rather than a
+    // hard outline, per the Serene Practice "tonal layers, not borders" rule.
+    val elevation by animateDpAsState(if (active) 8.dp else 1.dp)
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { onToggleCollapse() },
-        colors = CardDefaults.cardColors(containerColor = bg)
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = if (active) {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        } else {
+            MaterialTheme.colorScheme.surfaceContainer
+        },
+        shadowElevation = elevation,
+        tonalElevation = if (active) 2.dp else 0.dp,
+        onClick = onTap,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(Modifier.padding(12.dp)) {
+        Column(Modifier.padding(20.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    row.label,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.width(72.dp)
+                    chordDisplayName(row.chord),
+                    style = MaterialTheme.typography.headlineSmall.copy(fontSize = 22.sp),
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.weight(1f)
                 )
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        inversionName(row.voicing.inv),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        row.voicing.notes.joinToString("  ") { Pitch.name(it) },
-                        style = PianoFlowTheme.extendedTypography.musicData
-                    )
-                }
-                IconButton(onClick = onTap) {
-                    Icon(
-                        Icons.Filled.PlayArrow,
-                        contentDescription = "Play chord",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+                PlayChordButton(onClick = onTap)
                 CollapseToggle(collapsed = keyboardCollapsed, onClick = onToggleCollapse)
             }
+            Spacer(Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    row.voicing.notes.joinToString(" ") { Pitch.name(it) },
+                    style = PianoFlowTheme.extendedTypography.musicData,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.width(8.dp))
+                InversionBadge(row.voicing.inv)
+            }
             if (!keyboardCollapsed) {
-                Spacer(Modifier.height(8.dp))
-                InversionPicker(
-                    pinned = row.pinned,
-                    positionLabel = "${row.currentCandidateIndex + 1} / ${row.candidateCount}",
-                    enabled = row.candidateCount > 1,
-                    onPrev = onPrev,
-                    onNext = onNext,
-                    onAuto = onAuto
-                )
-                Spacer(Modifier.height(8.dp))
-                PianoKeyboard(
-                    startMidi = keyboardStart,
-                    endMidi = keyboardEnd,
-                    highlighted = row.voicing.notes.toSet(),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Spacer(Modifier.height(16.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                        .padding(6.dp)
+                ) {
+                    PianoKeyboard(
+                        startMidi = keyboardStart,
+                        endMidi = keyboardEnd,
+                        highlighted = row.voicing.notes.toSet(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                if (row.candidateCount > 1) {
+                    Spacer(Modifier.height(12.dp))
+                    InversionPicker(
+                        pinned = row.pinned,
+                        position = row.currentCandidateIndex + 1,
+                        total = row.candidateCount,
+                        onPrev = onPrev,
+                        onNext = onNext,
+                        onAuto = onAuto
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun PlayChordButton(onClick: () -> Unit) {
+    Surface(shape = Pill, color = MaterialTheme.colorScheme.surface) {
+        IconButton(onClick = onClick) {
+            Icon(
+                Icons.Filled.PlayArrow,
+                contentDescription = "Play chord",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun InversionBadge(inv: Int) {
+    Surface(
+        shape = Pill,
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Text(
+            inversionBadge(inv),
+            style = PianoFlowTheme.extendedTypography.labelCaps.copy(fontSize = 10.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+        )
     }
 }
 
@@ -345,7 +494,7 @@ private fun CollapseToggle(collapsed: Boolean, onClick: () -> Unit) {
         Icon(
             imageVector = if (collapsed) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
             contentDescription = if (collapsed) "Expand keyboard" else "Collapse keyboard",
-            tint = MaterialTheme.colorScheme.primary
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -353,8 +502,8 @@ private fun CollapseToggle(collapsed: Boolean, onClick: () -> Unit) {
 @Composable
 private fun InversionPicker(
     pinned: Boolean,
-    positionLabel: String,
-    enabled: Boolean,
+    position: Int,
+    total: Int,
     onPrev: () -> Unit,
     onNext: () -> Unit,
     onAuto: () -> Unit,
@@ -362,30 +511,59 @@ private fun InversionPicker(
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         StepButton(
             icon = Icons.Filled.KeyboardArrowLeft,
             contentDescription = "Previous voicing",
-            enabled = enabled,
+            enabled = true,
             onClick = onPrev
         )
-        Text(
-            "voicing $positionLabel",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Column(Modifier.weight(1f)) {
+            // Voicing index in mono (musical data) + a plain-language "of N".
+            Text(
+                buildAnnotatedString {
+                    append("Voicing ")
+                    withStyle(
+                        SpanStyle(
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    ) { append("$position") }
+                    append(" of $total")
+                },
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1
+            )
+            Text(
+                if (pinned) "Pinned by you" else "Auto-picked",
+                style = MaterialTheme.typography.labelSmall,
+                color = if (pinned) {
+                    MaterialTheme.colorScheme.secondary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                maxLines = 1,
+                softWrap = false
+            )
+        }
         StepButton(
             icon = Icons.Filled.KeyboardArrowRight,
             contentDescription = "Next voicing",
-            enabled = enabled,
+            enabled = true,
             onClick = onNext
         )
-        Spacer(Modifier.width(4.dp))
         AssistChip(
             onClick = onAuto,
             enabled = pinned,
-            label = { Text(if (pinned) "Locked — reset" else "Auto") }
+            label = {
+                Text(
+                    if (pinned) "Reset" else "Auto",
+                    maxLines = 1,
+                    softWrap = false,
+                )
+            }
         )
     }
 }
@@ -406,4 +584,43 @@ private fun StepButton(
     ) {
         Icon(imageVector = icon, contentDescription = contentDescription)
     }
+}
+
+/**
+ * Friendly card title, e.g. "C Major" / "A Minor". The root note is musical data
+ * (IBM Plex Mono); the narrative quality word inherits the surrounding UI font.
+ */
+@Composable
+private fun chordDisplayName(chord: Chord) = buildAnnotatedString {
+    withStyle(
+        SpanStyle(fontFamily = PianoFlowTheme.extendedTypography.musicData.fontFamily)
+    ) {
+        append(Pitch.NAMES[chord.rootPc])
+    }
+    append(" ")
+    append(qualityDisplayName(chord.quality))
+}
+
+private fun qualityDisplayName(q: Quality): String = when (q) {
+    Quality.MAJ -> "Major"
+    Quality.MIN -> "Minor"
+    Quality.DIM -> "Diminished"
+    Quality.AUG -> "Augmented"
+    Quality.SUS2 -> "Sus2"
+    Quality.SUS4 -> "Sus4"
+    Quality.DOM7 -> "Dom 7th"
+    Quality.MAJ7 -> "Major 7th"
+    Quality.MIN7 -> "Minor 7th"
+    Quality.DIM7 -> "Dim 7th"
+    Quality.M7B5 -> "Half-Dim"
+    Quality.MAJ6 -> "Major 6th"
+    Quality.MIN6 -> "Minor 6th"
+}
+
+private fun inversionBadge(inv: Int): String = when (inv) {
+    0 -> "Root Pos"
+    1 -> "1st Inv"
+    2 -> "2nd Inv"
+    3 -> "3rd Inv"
+    else -> "Inv $inv"
 }
