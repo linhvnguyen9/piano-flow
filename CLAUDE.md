@@ -37,6 +37,27 @@ Then `Read feature/chord-smoother/impl/build/outputs/roborazzi/_inspect_songs_sc
 
 For a scrollable screen, give Robolectric a tall canvas so the `LazyColumn` lays out everything in one frame: `@Config(qualifiers = "w360dp-h2000dp-xxhdpi", sdk = [35])`. See `SongsScreenInspection.inspect_songsScreen_fullProgression` for the pattern.
 
+## Component catalog (check before building new UI)
+
+Before creating a new reusable Composable, check the catalog for one to reuse:
+
+- Index: `docs/components/COMPONENTS.md` — a table of every catalogued component with a screenshot, fully-qualified name, and usage snippet. `Read` it (the PNGs are visible to you).
+- Humans: on a **debug** build, open the **PianoFlow Catalog** launcher icon for the interactive Showkase browser.
+
+The catalog is powered by Airbnb Showkase, wired **debug-only and centralized in `:androidApp`** (the `pianoflow.showkase` convention plugin adds `showkase`/`showkase-processor` to debug; the Showkase Gradle plugin is intentionally not applied — it can't attach to a `com.android.application` module on AGP 9). Showcase wrappers and the `@ShowkaseRoot` live in `androidApp/src/debug/.../showcase/`; the Roborazzi catalog test + `ComponentsIndexTest` live in `androidApp/src/test/...`.
+
+To add a component (must be **module-public** so the app's debug source can call it):
+
+1. Add a zero-arg `@ShowkaseComposable(name = …, group = …)` wrapper in `androidApp/src/debug/kotlin/com/linh/pianoflow/showcase/`, wrapped in `PianoFlowTheme { Surface { … } }`.
+2. Add a `details` row in `ComponentsIndexTest` (fully-qualified name + usage snippet).
+3. Regenerate the PNGs + index:
+
+```bash
+./gradlew :androidApp:testDebugUnitTest -Proborazzi.test.record=true
+```
+
+Only module-public, reusable components belong in the catalog — not whole screens/sheets, not `private` screen-internals.
+
 ## Screenshot testing quirks
 
 Full workflow doc: `docs/SCREENSHOT_TESTING.md`. Things easy to trip on:

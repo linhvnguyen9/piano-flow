@@ -30,5 +30,9 @@ gradlePlugin {
             id = "pianoflow.enro"
             implementationClass = "com.linh.pianoflow.buildlogic.EnroConventionPlugin"
         }
+        register("showkase") {
+            id = "pianoflow.showkase"
+            implementationClass = "com.linh.pianoflow.buildlogic.ShowkaseConventionPlugin"
+        }
     }
 }
