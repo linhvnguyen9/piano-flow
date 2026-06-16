@@ -7,8 +7,9 @@ import org.junit.Test
 class ShowkaseMetadataTest {
 
     @Test
-    fun metadata_contains_pianoKeyboard() {
+    fun metadata_contains_catalogComponents() {
         val names = Showkase.getMetadata().componentList.map { it.componentName }
-        assertTrue("Expected 'PianoKeyboard' in Showkase metadata but got $names", "PianoKeyboard" in names)
+        assertTrue("Expected 'PianoKeyboard' in $names", "PianoKeyboard" in names)
+        assertTrue("Expected 'ChordProgressionField' in $names", "ChordProgressionField" in names)
     }
 }
