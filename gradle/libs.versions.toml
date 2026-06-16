@@ -21,6 +21,7 @@ koin = "4.0.4"
 enro = "3.0.0-beta02"
 ksp = "2.3.9"
 kotlinxSerialization = "1.7.3"
+showkase = "1.0.5"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -69,6 +70,10 @@ enro-processor = { module = "dev.enro:enro-processor", version.ref = "enro" }
 enro-test = { module = "dev.enro:enro-test", version.ref = "enro" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
 
+showkase = { module = "com.airbnb.android:showkase", version.ref = "showkase" }
+showkase-annotation = { module = "com.airbnb.android:showkase-annotation", version.ref = "showkase" }
+showkase-processor = { module = "com.airbnb.android:showkase-processor", version.ref = "showkase" }
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
@@ -81,3 +86,4 @@ pianoflow-kmpLibrary = { id = "pianoflow.kmp.library" }
 pianoflow-kmpCompose = { id = "pianoflow.kmp.compose" }
 pianoflow-composeScreenshotTesting = { id = "pianoflow.compose-screenshot-testing" }
 pianoflow-enro = { id = "pianoflow.enro" }
+pianoflow-showkase = { id = "pianoflow.showkase" }
