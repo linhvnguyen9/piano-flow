@@ -3,21 +3,18 @@ package com.linh.pianoflow.buildlogic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 /**
- * Wires Airbnb Showkase into a module.
+ * Wires Airbnb Showkase into the application module.
  *
- * - KMP library modules (`org.jetbrains.kotlin.multiplatform`): puts `showkase-annotation`
- *   on the `androidMain` source set (where the `@ShowkaseComposable` wrappers live) and runs
- *   the processor on the Android target via `kspAndroid`.
- * - The application module (`com.android.application`): adds the Showkase browser
- *   (`debugImplementation`), the annotation, and runs the processor on debug via `kspDebug`,
- *   so the `@ShowkaseRoot` aggregator and generated `Showkase` object exist in debug builds only.
+ * The catalog's showcase wrappers (`@ShowkaseComposable`) and its `@ShowkaseRoot` aggregator
+ * live in `androidApp`'s `debug` source set, so the Showkase browser library and the generated
+ * `Showkase` metadata exist in debug builds only and never reach release or the core modules.
+ * The processor (`kspDebug`) generates code that references the Showkase runtime models, so the
+ * full `showkase` library — not just `showkase-annotation` — must be on the debug classpath.
  *
- * Mirrors EnroConventionPlugin. Apply after the Kotlin Multiplatform / Android plugins.
+ * Mirrors EnroConventionPlugin. Apply after the Android application + Compose plugins.
  */
 class ShowkaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
@@ -27,25 +24,10 @@ class ShowkaseConventionPlugin : Plugin<Project> {
         pluginManager.apply("com.google.devtools.ksp")
 
         val showkase = lib("showkase")
-        val showkaseAnnotation = lib("showkase-annotation")
         val showkaseProcessor = lib("showkase-processor")
-
-        pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
-            extensions.configure<KotlinMultiplatformExtension> {
-                sourceSets.configureEach {
-                    if (name == "androidMain") {
-                        dependencies {
-                            implementation(showkaseAnnotation)
-                        }
-                    }
-                }
-            }
-            dependencies.add("kspAndroid", showkaseProcessor)
-        }
 
         pluginManager.withPlugin("com.android.application") {
             dependencies.add("debugImplementation", showkase)
-            dependencies.add("implementation", showkaseAnnotation)
             dependencies.add("kspDebug", showkaseProcessor)
         }
     }

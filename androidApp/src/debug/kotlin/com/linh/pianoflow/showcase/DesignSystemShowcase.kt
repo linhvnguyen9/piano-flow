@@ -1,4 +1,4 @@
-package com.linh.pianoflow.core.designsystem.showcase
+package com.linh.pianoflow.showcase
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,7 +12,8 @@ import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
 
 /**
  * Showcase wrappers for :core:designsystem components. Zero-arg, themed renders used by
- * the Showkase browser and the Roborazzi catalog. NOT shipped UI — these are catalog entries.
+ * the Showkase browser and the Roborazzi catalog. Debug-only — these are catalog entries,
+ * not shipped UI. Only module-public components belong here.
  */
 @ShowkaseComposable(name = "PianoKeyboard", group = "DesignSystem")
 @Composable
