@@ -56,6 +56,9 @@ fun keyboardRange(voicings: List<Voicing>): Pair<Int, Int> {
     val lo = allNotes.min()
     val hi = allNotes.max()
     val start = lo - ((lo % 12) + 12) % 12
-    val end = hi + (11 - ((hi % 12) + 12) % 12)
+    val fullEnd = hi + (11 - ((hi % 12) + 12) % 12)
+    // Cap the keybed at two octaves (24 semitones, C..B) so it stays readable;
+    // a wider progression keeps its lowest octave anchored.
+    val end = minOf(fullEnd, start + 23)
     return start to end
 }

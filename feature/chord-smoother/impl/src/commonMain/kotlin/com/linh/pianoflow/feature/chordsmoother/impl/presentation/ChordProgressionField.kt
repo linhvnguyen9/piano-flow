@@ -1,6 +1,5 @@
 package com.linh.pianoflow.feature.chordsmoother.impl.presentation
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -9,9 +8,13 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -20,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -75,10 +77,11 @@ fun ChordProgressionField(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(6.dp))
+        // Tonal layer instead of a hard stroke: filled surface, 16dp radius, soft shadow.
         Surface(
-            shape = RoundedCornerShape(10.dp),
-            color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            shadowElevation = 1.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("chordFieldContainer")
@@ -89,7 +92,7 @@ fun ChordProgressionField(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 FlowRow(
-                    modifier = Modifier.weight(1f).padding(10.dp),
+                    modifier = Modifier.weight(1f).padding(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
@@ -134,28 +137,68 @@ fun ChordProgressionField(
                             },
                     )
                 }
-                IconButton(onClick = onOpenPicker) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = "Pick a chord",
-                        tint = MaterialTheme.colorScheme.primary,
+                AddChordButton(onClick = onOpenPicker)
+                Spacer(Modifier.width(8.dp))
+            }
+        }
+        if (examples.isNotEmpty()) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                if (isEmpty) "Try an example" else "Or start from an example",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(6.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                examples.forEachIndexed { i, ex ->
+                    AssistChip(
+                        onClick = { onPickExample(ex) },
+                        label = { Text(exampleLabel(i, ex)) },
+                        shape = Pill,
                     )
                 }
             }
         }
-        if (isEmpty && examples.isNotEmpty()) {
-            Spacer(Modifier.height(8.dp))
-            Text(
-                "Try an example",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+    }
+}
+
+/** Friendly, genre-flavored names for the canned example progressions. */
+private fun exampleLabel(index: Int, raw: String): String = when (index) {
+    0 -> "Pop"
+    1 -> "Ballad"
+    2 -> "Jazz"
+    else -> raw
+}
+
+@Composable
+private fun AddChordButton(onClick: () -> Unit) {
+    Surface(
+        shape = Pill,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = Modifier
+            .heightIn(min = 48.dp)
+            .clickable(onClick = onClick),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(horizontal = 16.dp),
+        ) {
+            Icon(
+                Icons.Filled.Add,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(18.dp),
             )
-            Spacer(Modifier.height(4.dp))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                examples.forEach { ex ->
-                    AssistChip(onClick = { onPickExample(ex) }, label = { Text(ex) }, shape = Pill)
-                }
-            }
+            Spacer(Modifier.width(4.dp))
+            Text(
+                "Add chord",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                maxLines = 1,
+                softWrap = false,
+            )
         }
     }
 }

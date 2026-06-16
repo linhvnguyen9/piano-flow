@@ -1,10 +1,14 @@
 package com.linh.pianoflow.feature.chordsmoother.impl.presentation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.linh.pianoflow.core.designsystem.theme.BottomSheet
 import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
@@ -74,6 +78,42 @@ class ChordPickerInspection {
         render(dark = true, name = "_inspect_picker_edit_dark.png", sheet = true) {
             ChordPickerContent(initial = Chord(0, Quality.MAJ7), onConfirm = {}, onDelete = {})
         }
+
+    @Test
+    @Config(qualifiers = "w360dp-h760dp-xxhdpi", sdk = [35])
+    fun inspect_picker_edit_bounded_light() =
+        renderBounded(dark = false, name = "_inspect_picker_edit_bounded.png") {
+            ChordPickerContent(initial = Chord(0, Quality.MAJ7), onConfirm = {}, onDelete = {})
+        }
+
+    @Test
+    @Config(qualifiers = "w360dp-h760dp-xxhdpi", sdk = [35])
+    fun inspect_picker_edit_bounded_dark() =
+        renderBounded(dark = true, name = "_inspect_picker_edit_bounded_dark.png") {
+            ChordPickerContent(initial = Chord(0, Quality.MAJ7), onConfirm = {}, onDelete = {})
+        }
+
+    /**
+     * Renders sheet content inside a FIXED-height bottom-sheet surface (≈ a real
+     * expanded sheet's viewport) so vertical overflow is exercised — which the tall,
+     * unbounded [render] above cannot catch. Guards the bottom action row against
+     * being compressed when the content is taller than the sheet.
+     */
+    private fun renderBounded(
+        dark: Boolean,
+        name: String,
+        content: @Composable () -> Unit,
+    ) {
+        composeRule.setContent {
+            PianoFlowTheme(darkTheme = dark) {
+                Surface(color = MaterialTheme.colorScheme.surface, shape = BottomSheet) {
+                    Box(Modifier.height(720.dp)) { content() }
+                }
+            }
+        }
+        composeRule.waitForIdle()
+        composeRule.onRoot().captureRoboImage(filePath = "build/outputs/roborazzi/$name")
+    }
 
     /** Wrap [content] in the theme + an appropriate Surface, then snapshot it. */
     private fun render(
