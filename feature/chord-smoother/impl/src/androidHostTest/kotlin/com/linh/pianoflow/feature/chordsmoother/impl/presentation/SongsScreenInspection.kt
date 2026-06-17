@@ -112,32 +112,32 @@ class SongsScreenInspection {
     @Test
     @Config(qualifiers = "w360dp-h4000dp-xxhdpi", sdk = [35])
     fun inspect_longProgression_light() =
-        capture(dark = false, fontScale = 1.5f, state = longProgressionState(), name = "_inspect_songs_long.png")
+        capture(dark = false, fontScale = 1.5f, state = longProgressionState(), name = "_inspect_songs_long_compact_font1_5.png")
 
     @Test
     @Config(qualifiers = "w360dp-h4000dp-xxhdpi", sdk = [35])
     fun inspect_longProgression_dark() =
-        capture(dark = true, fontScale = 1.5f, state = longProgressionState(), name = "_inspect_songs_long_dark.png")
+        capture(dark = true, fontScale = 1.5f, state = longProgressionState(), name = "_inspect_songs_long_compact_font1_5_dark.png")
 
     @Test
     @Config(qualifiers = "w360dp-h1400dp-xxhdpi", sdk = [35])
     fun inspect_empty_light() =
-        capture(dark = false, fontScale = 1.5f, state = emptyState(), name = "_inspect_songs_empty.png")
+        capture(dark = false, fontScale = 1.5f, state = emptyState(), name = "_inspect_songs_empty_compact_font1_5.png")
 
     @Test
     @Config(qualifiers = "w360dp-h1400dp-xxhdpi", sdk = [35])
     fun inspect_empty_dark() =
-        capture(dark = true, fontScale = 1.5f, state = emptyState(), name = "_inspect_songs_empty_dark.png")
+        capture(dark = true, fontScale = 1.5f, state = emptyState(), name = "_inspect_songs_empty_compact_font1_5_dark.png")
 
     @Test
     @Config(qualifiers = "w360dp-h2400dp-xxhdpi", sdk = [35])
     fun inspect_error_light() =
-        capture(dark = false, fontScale = 1.5f, state = errorState(), name = "_inspect_songs_error.png")
+        capture(dark = false, fontScale = 1.5f, state = errorState(), name = "_inspect_songs_error_compact_font1_5.png")
 
     @Test
     @Config(qualifiers = "w360dp-h2400dp-xxhdpi", sdk = [35])
     fun inspect_error_dark() =
-        capture(dark = true, fontScale = 1.5f, state = errorState(), name = "_inspect_songs_error_dark.png")
+        capture(dark = true, fontScale = 1.5f, state = errorState(), name = "_inspect_songs_error_compact_font1_5_dark.png")
 
     /**
      * Renders the screen with [fontScale] applied via [LocalDensity] (so `sp` text

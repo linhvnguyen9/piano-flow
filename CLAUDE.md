@@ -40,6 +40,17 @@ Then `Read feature/chord-smoother/impl/build/outputs/roborazzi/_inspect_songs_de
 - **Width** — `@Config(qualifiers = "w360dp-h2000dp-xxhdpi", sdk = [35])` per method (the lever Robolectric honors for display metrics; tall canvas so the `LazyColumn` lays out in one frame). One capture per `@Test` — `setContent` is single-shot per compose rule.
 - **Font scale** — override `LocalDensity` (`CompositionLocalProvider(LocalDensity provides Density(base.density, fontScale))`), since Robolectric has no font-scale qualifier. `sp` text scales, `dp` containers don't — mimics accessibility text size and the overflow it causes.
 
+## Executor-evaluator UI loop (after any @Composable change)
+
+Pair the inspection matrix with a separate **evaluator** so UI work is graded, not just rendered. Keep the two lanes apart — the context that edits a `@Composable` must not also grade it (that's self-review). The loop:
+
+1. **Executor** edits the `@Composable`.
+2. **Render** the matrix: `./gradlew :<module>:testAndroidHostTest --tests "...<Screen>Inspection" -Proborazzi.test.record=true` → `build/outputs/roborazzi/_inspect_*.png`.
+3. **Evaluate** in a separate lane: dispatch the `mobile-design-evaluator` agent (defined in `.claude/agents/mobile-design-evaluator.md`) at the PNG directory. It loads the `mobile-design` skill, reads every PNG, and writes a `pass`/`fail` verdict with element-level fixes to `_verdict.md` beside them. It never edits source.
+4. **Read `_verdict.md`**, apply the Tier-1 fixes, loop from step 2 until the verdict passes. Ship on `pass` (Tier-2 issues become follow-ups).
+
+Dispatch it by name (`subagent_type: "mobile-design-evaluator"`), or have a generic agent `Read` and follow `.claude/agents/mobile-design-evaluator.md`. Inspection PNG filenames encode their config (`360`/`411`, `font1_5`/`font2_0`, `_dark`, state words) so the evaluator can attribute each defect to a specific config — keep new captures self-describing.
+
 ## Component catalog (check before building new UI)
 
 Before creating a new reusable Composable, check the catalog for one to reuse:
