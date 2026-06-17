@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -148,10 +150,18 @@ fun SongsScreenContent(
                         onClick = onPlay,
                         enabled = !state.isPlaying && state.rows.isNotEmpty(),
                         shape = Pill,
-                        modifier = Modifier.fillMaxWidth().height(56.dp)
+                        // 56dp is the Serene Practice pill-button baseline, but only a
+                        // minimum: at large font scales the label wraps and the button
+                        // grows taller rather than clipping "Play Progression" to "Play".
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                        modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp)
                     ) {
                         if (state.isPlaying) {
-                            Text("Playing…", style = MaterialTheme.typography.headlineSmall)
+                            Text(
+                                "Playing…",
+                                style = MaterialTheme.typography.headlineSmall,
+                                textAlign = TextAlign.Center
+                            )
                         } else {
                             Icon(
                                 Icons.Filled.PlayArrow,
@@ -159,7 +169,11 @@ fun SongsScreenContent(
                                 modifier = Modifier.size(28.dp)
                             )
                             Spacer(Modifier.width(8.dp))
-                            Text("Play Progression", style = MaterialTheme.typography.headlineSmall)
+                            Text(
+                                "Play Progression",
+                                style = MaterialTheme.typography.headlineSmall,
+                                textAlign = TextAlign.Center
+                            )
                         }
                     }
                 }
@@ -278,6 +292,10 @@ private fun MovementSummary(rowCount: Int, optimized: Double, baseline: Double) 
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Warm Honey Amber in both modes via the mode-independent fixed tokens.
+        // The capsule holds only the headline metric so it never has to absorb the
+        // before→after detail; that moves to the caption, which wraps freely. At large
+        // font scale the headline " semitones" word wraps inside the (height-free)
+        // capsule rather than overrunning its right edge.
         Surface(
             shape = Pill,
             color = MaterialTheme.colorScheme.secondaryFixedDim,
@@ -298,26 +316,13 @@ private fun MovementSummary(rowCount: Int, optimized: Double, baseline: Double) 
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSecondaryFixed
                 )
-                if (improved) {
-                    Text(
-                        "  ·  down from ",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryFixed
-                    )
-                    Text(
-                        "$base",
-                        style = PianoFlowTheme.extendedTypography.musicData,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSecondaryFixed
-                    )
-                }
             }
         }
         Spacer(Modifier.height(8.dp))
         Text(
             when {
-                improved && percent > 0 -> "Saved $saved semitones — $percent% less hand movement"
-                improved -> "Saved $saved semitones of hand movement"
+                improved && percent > 0 -> "Down from $base — saved $saved semitones ($percent% less hand movement)"
+                improved -> "Down from $base — saved $saved semitones of hand movement"
                 else -> "Already as smooth as it gets — no extra movement to trim"
             },
             style = MaterialTheme.typography.bodySmall,
@@ -335,26 +340,33 @@ private fun ConnectorPill(move: Double, showCaption: Boolean) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Honey Amber connector, mode-independent so it stays warm in dark mode.
+        // One annotated Text (not a Row of two) so the "· smoothed" qualifier wraps as
+        // part of the same string at large font scale — the capsule grows taller instead
+        // of the suffix fragmenting and floating over the rounded edge.
         Surface(
             shape = Pill,
             color = MaterialTheme.colorScheme.secondaryFixedDim
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    "↓ ${move.roundToInt()} semitones",
-                    style = PianoFlowTheme.extendedTypography.musicData,
-                    color = MaterialTheme.colorScheme.onSecondaryFixed,
-                )
-                // Subtle qualifier so the hop reads as the optimized result.
-                Text(
-                    " · smoothed",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryFixed.copy(alpha = 0.7f),
-                )
-            }
+            Text(
+                buildAnnotatedString {
+                    append("↓ ${move.roundToInt()} semitones")
+                    // Subtle qualifier so the hop reads as the optimized result.
+                    withStyle(
+                        SpanStyle(
+                            fontFamily = FontFamily.Default,
+                            fontSize = MaterialTheme.typography.labelMedium.fontSize,
+                            color = MaterialTheme.colorScheme.onSecondaryFixed.copy(alpha = 0.7f),
+                        )
+                    ) {
+                        append("  ·  smoothed")
+                    }
+                },
+                style = PianoFlowTheme.extendedTypography.musicData.copy(
+                    color = MaterialTheme.colorScheme.onSecondaryFixed
+                ),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+            )
         }
         // One-time, calm caption near the first connector only.
         if (showCaption) {
@@ -508,62 +520,117 @@ private fun InversionPicker(
     onNext: () -> Unit,
     onAuto: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        StepButton(
-            icon = Icons.Filled.KeyboardArrowLeft,
-            contentDescription = "Previous voicing",
-            enabled = true,
-            onClick = onPrev
-        )
-        Column(Modifier.weight(1f)) {
-            // Voicing index in mono (musical data) + a plain-language "of N".
-            Text(
-                buildAnnotatedString {
-                    append("Voicing ")
-                    withStyle(
-                        SpanStyle(
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Medium,
+    // At accessibility font scales the label + ‹ › + Auto can't share one line without
+    // truncating "Voicing X of Y" to "Voici", so the label moves to its own row above
+    // the controls. At 1.0 the compact single-row layout is kept.
+    val stacked = LocalDensity.current.fontScale >= 1.3f
+    if (stacked) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            VoicingLabel(pinned = pinned, position = position, total = total)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                StepButton(
+                    icon = Icons.Filled.KeyboardArrowLeft,
+                    contentDescription = "Previous voicing",
+                    enabled = true,
+                    onClick = onPrev
+                )
+                StepButton(
+                    icon = Icons.Filled.KeyboardArrowRight,
+                    contentDescription = "Next voicing",
+                    enabled = true,
+                    onClick = onNext
+                )
+                Spacer(Modifier.weight(1f))
+                AssistChip(
+                    onClick = onAuto,
+                    enabled = pinned,
+                    label = {
+                        Text(
+                            if (pinned) "Reset" else "Auto",
+                            maxLines = 1,
+                            softWrap = false,
                         )
-                    ) { append("$position") }
-                    append(" of $total")
-                },
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1
-            )
-            Text(
-                if (pinned) "Pinned by you" else "Auto-picked",
-                style = MaterialTheme.typography.labelSmall,
-                color = if (pinned) {
-                    MaterialTheme.colorScheme.secondary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                maxLines = 1,
-                softWrap = false
-            )
-        }
-        StepButton(
-            icon = Icons.Filled.KeyboardArrowRight,
-            contentDescription = "Next voicing",
-            enabled = true,
-            onClick = onNext
-        )
-        AssistChip(
-            onClick = onAuto,
-            enabled = pinned,
-            label = {
-                Text(
-                    if (pinned) "Reset" else "Auto",
-                    maxLines = 1,
-                    softWrap = false,
+                    }
                 )
             }
+        }
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            StepButton(
+                icon = Icons.Filled.KeyboardArrowLeft,
+                contentDescription = "Previous voicing",
+                enabled = true,
+                onClick = onPrev
+            )
+            VoicingLabel(
+                pinned = pinned,
+                position = position,
+                total = total,
+                modifier = Modifier.weight(1f)
+            )
+            StepButton(
+                icon = Icons.Filled.KeyboardArrowRight,
+                contentDescription = "Next voicing",
+                enabled = true,
+                onClick = onNext
+            )
+            AssistChip(
+                onClick = onAuto,
+                enabled = pinned,
+                label = {
+                    Text(
+                        if (pinned) "Reset" else "Auto",
+                        maxLines = 1,
+                        softWrap = false,
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun VoicingLabel(
+    pinned: Boolean,
+    position: Int,
+    total: Int,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier) {
+        // Voicing index in mono (musical data) + a plain-language "of N".
+        Text(
+            buildAnnotatedString {
+                append("Voicing ")
+                withStyle(
+                    SpanStyle(
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Medium,
+                    )
+                ) { append("$position") }
+                append(" of $total")
+            },
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            if (pinned) "Pinned by you" else "Auto-picked",
+            style = MaterialTheme.typography.labelSmall,
+            color = if (pinned) {
+                MaterialTheme.colorScheme.secondary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
         )
     }
 }
