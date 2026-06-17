@@ -10,10 +10,6 @@ import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
 import com.linh.pianoflow.feature.chordsmoother.impl.presentation.ChordProgressionField
 
-/**
- * Showcase wrappers for reusable Songs components. Debug-only catalog entries — not shipped UI.
- * Only module-public components belong here.
- */
 @ShowkaseComposable(name = "ChordProgressionField", group = "Songs")
 @Composable
 fun ChordProgressionFieldShowcase() {

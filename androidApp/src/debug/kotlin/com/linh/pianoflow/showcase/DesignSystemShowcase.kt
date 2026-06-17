@@ -10,11 +10,6 @@ import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.linh.pianoflow.core.designsystem.PianoKeyboard
 import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
 
-/**
- * Showcase wrappers for :core:designsystem components. Zero-arg, themed renders used by
- * the Showkase browser and the Roborazzi catalog. Debug-only — these are catalog entries,
- * not shipped UI. Only module-public components belong here.
- */
 @ShowkaseComposable(name = "PianoKeyboard", group = "DesignSystem")
 @Composable
 fun PianoKeyboardShowcase() {
