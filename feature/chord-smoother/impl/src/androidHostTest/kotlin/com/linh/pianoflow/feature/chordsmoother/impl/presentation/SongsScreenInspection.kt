@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.Density
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
+import com.linh.pianoflow.feature.chordsmoother.impl.testing.Tier1Assertions
 import com.linh.pianoflow.feature.chordsmoother.impl.domain.DefaultChordProgressionParser
 import com.linh.pianoflow.feature.chordsmoother.impl.domain.DefaultProgressionSolver
 import com.linh.pianoflow.feature.chordsmoother.impl.domain.candidates
@@ -154,6 +155,7 @@ class SongsScreenInspection {
         }
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage(filePath = "build/outputs/roborazzi/$name")
+        Tier1Assertions.assertAll(composeRule, label = name)
     }
 }
 

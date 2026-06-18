@@ -28,7 +28,6 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -53,6 +52,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.linh.pianoflow.core.designsystem.AppIconButton
 import com.linh.pianoflow.core.designsystem.PianoKeyboard
 import com.linh.pianoflow.core.designsystem.theme.Pill
 import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
@@ -473,7 +473,7 @@ private fun ChordCard(
 @Composable
 private fun PlayChordButton(onClick: () -> Unit) {
     Surface(shape = Pill, color = MaterialTheme.colorScheme.surface) {
-        IconButton(onClick = onClick) {
+        AppIconButton(onClick = onClick) {
             Icon(
                 Icons.Filled.PlayArrow,
                 contentDescription = "Play chord",
@@ -502,7 +502,7 @@ private fun InversionBadge(inv: Int) {
 
 @Composable
 private fun CollapseToggle(collapsed: Boolean, onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
+    AppIconButton(onClick = onClick) {
         Icon(
             imageVector = if (collapsed) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
             contentDescription = if (collapsed) "Expand keyboard" else "Collapse keyboard",
@@ -642,7 +642,7 @@ private fun StepButton(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    IconButton(
+    AppIconButton(
         onClick = onClick,
         enabled = enabled,
         colors = IconButtonDefaults.iconButtonColors(
