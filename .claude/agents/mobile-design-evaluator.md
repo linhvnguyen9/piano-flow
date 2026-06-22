@@ -67,6 +67,21 @@ guess — return a verdict of `fail` stating the harness has not been run, and g
    if several), **and** return the identical content as your final message. The written file is the
    durable deliverable; the final message is your hand-back to the dispatcher.
 
+7. **Emit the ledger sidecar.** In the same directory, (over)write `_eval_findings.jsonl` — one
+   compact JSON object per *violation* (Tier-1 and Tier-2 alike), so your findings feed the durable
+   feedback ledger the same way the deterministic assertions do. The deterministic Tier-1 sidecar
+   (`_findings.jsonl`) is a *different* file; never touch it. Skip the file only if you found zero
+   violations. Schema per row (match it exactly — `harness/bin/aggregate_ledger.py` folds these into
+   `harness/ledger/findings.jsonl`; see `harness/ledger/README.md`):
+
+   ```json
+   {"ts":"<ISO8601 UTC>","screen":"<ScreenName>","config":"<from step 2, e.g. 360_font2_0_dark>","loop":"impl","role":"evaluator","tier":1,"category":"<rubric vocab: spacing|hierarchy|color|typography|truncation|overlap|insets|reuse|fidelity|...>","severity":"blocker|warn|nit","element":"<element>","finding":"<what's wrong, where>","fix":"<concrete fix>","iteration":null,"resolved":false,"deposit":null}
+   ```
+
+   Get the timestamp with `date -u +%Y-%m-%dT%H:%M:%SZ` (Bash). Use `tier` 1 for structural blockers,
+   2 for taste; set `severity` to `blocker` for any Tier-1 hit. Leave `iteration` null — the
+   aggregator stamps it. Do **not** run the aggregator yourself; the dispatcher owns that.
+
 ## Discipline
 
 - **Be specific or say nothing.** "[truncation] 'Play Progression' button label clipped to 'Play

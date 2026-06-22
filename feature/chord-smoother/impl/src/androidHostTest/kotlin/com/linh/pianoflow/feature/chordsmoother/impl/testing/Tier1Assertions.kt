@@ -136,8 +136,9 @@ object Tier1Assertions {
 
     /**
      * Append one JSONL line per violation to `build/outputs/roborazzi/_findings.jsonl`.
-     * The file is module-local and append-only within a run; `/ui-distill` is
-     * what aggregates these sidecars into the canonical `harness/ledger/findings.jsonl`.
+     * The file is module-local and append-only within a run; `harness/bin/aggregate_ledger.py`
+     * folds these sidecars into the canonical `harness/ledger/findings.jsonl` (which
+     * `/ui-distill` then clusters and `/ui-metrics` trends).
      */
     private fun writeFindings(label: String, violations: List<String>) {
         val (screen, config) = parseLabel(label)

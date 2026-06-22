@@ -17,6 +17,8 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
+__pycache__/
+*.pyc
 
 # Superpowers planning artifacts (brainstorm specs / implementation plans) — kept local, not committed
 docs/superpowers/specs/

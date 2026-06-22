@@ -51,6 +51,17 @@ Pair the inspection matrix with a separate **evaluator** so UI work is graded, n
 
 Dispatch it by name (`subagent_type: "mobile-design-evaluator"`), or have a generic agent `Read` and follow `.claude/agents/mobile-design-evaluator.md`. Inspection PNG filenames encode their config (`360`/`411`, `font1_5`/`font2_0`, `_dark`, state words) so the evaluator can attribute each defect to a specific config — keep new captures self-describing.
 
+### Feedback ledger (capture every finding)
+
+Both lanes emit findings to gitignored, build-local sidecars: `Tier1Assertions` writes `<module>/build/outputs/roborazzi/_findings.jsonl`; the evaluator writes `_eval_findings.jsonl` beside its `_verdict.md`. After a render + evaluate pass, fold them into the durable, committed ledger:
+
+```bash
+python3 harness/bin/aggregate_ledger.py          # collect sidecars -> harness/ledger/findings.jsonl
+python3 harness/bin/aggregate_ledger.py --iteration 2   # stamp the loop iteration
+```
+
+This is the *capture* half of the self-improvement ratchet — the substrate the (not-yet-built) `/ui-distill` clusters into permanent gates and `/ui-metrics` trends. Schema, dedup semantics, and the aggregator self-test (`test_aggregate_ledger.py`) are documented in `harness/ledger/README.md`. Don't hand-edit `findings.jsonl`; let the aggregator append.
+
 ## Component catalog (check before building new UI)
 
 Before creating a new reusable Composable, check the catalog for one to reuse:
