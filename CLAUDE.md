@@ -42,14 +42,16 @@ Then `Read feature/chord-smoother/impl/build/outputs/roborazzi/_inspect_songs_de
 
 ## Executor-evaluator UI loop (after any @Composable change)
 
-Pair the inspection matrix with a separate **evaluator** so UI work is graded, not just rendered. Keep the two lanes apart — the context that edits a `@Composable` must not also grade it (that's self-review). The loop:
+Pair the inspection matrix with a separate **evaluator** so UI work is graded, not just rendered. Keep the two lanes apart — the context that edits a `@Composable` must not also grade it (that's self-review).
+
+**`/ui-iterate <ScreenName>` drives this loop end to end** — boundary gate → render+Tier-1 → evaluate → aggregate to the ledger, capped at 4 iterations with human escalation (see `.claude/commands/ui-iterate.md`). The steps below are what it does, and the manual recipe when driving by hand. The loop:
 
 1. **Executor** edits the `@Composable`.
 2. **Render** the matrix: `./gradlew :<module>:testAndroidHostTest --tests "...<Screen>Inspection" -Proborazzi.test.record=true` → `build/outputs/roborazzi/_inspect_*.png`.
 3. **Evaluate** in a separate lane: dispatch the `mobile-design-evaluator` agent (defined in `.claude/agents/mobile-design-evaluator.md`) at the PNG directory. It loads the `mobile-design` skill, reads every PNG, and writes a `pass`/`fail` verdict with element-level fixes to `_verdict.md` beside them. It never edits source.
 4. **Read `_verdict.md`**, apply the Tier-1 fixes, loop from step 2 until the verdict passes. Ship on `pass` (Tier-2 issues become follow-ups).
 
-Dispatch it by name (`subagent_type: "mobile-design-evaluator"`), or have a generic agent `Read` and follow `.claude/agents/mobile-design-evaluator.md`. Inspection PNG filenames encode their config (`360`/`411`, `font1_5`/`font2_0`, `_dark`, state words) so the evaluator can attribute each defect to a specific config — keep new captures self-describing.
+Dispatch it by name (`subagent_type: "mobile-design-evaluator"`), or have a generic agent `Read` and follow `.claude/agents/mobile-design-evaluator.md`. Inspection PNG filenames are `_inspect_<screen>_<config>.png`: the **leading token** is the canonical **screen id** (`songs`/`field`/`picker`, a single token — no underscores), and the rest encodes config (`360`/`411`, `font1_5`/`font2_0`, `_dark`, state words). Both lanes key ledger findings on that screen id (Tier-1 parses it; the evaluator copies it), so `/ui-distill` clusters per screen — keep new captures self-describing and use a single-token slug.
 
 ### Feedback ledger (capture every finding)
 

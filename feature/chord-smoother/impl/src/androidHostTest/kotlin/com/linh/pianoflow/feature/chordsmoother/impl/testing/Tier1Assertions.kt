@@ -159,9 +159,12 @@ object Tier1Assertions {
     }
 
     private fun parseLabel(label: String): Pair<String, String> {
-        // labels look like "_inspect_songs_long_compact_font1_5_dark.png" or
-        // "_inspect_field_empty_dark.png" — strip prefix/suffix and split on
-        // the first underscore.
+        // Canonical contract: inspection PNGs are named `_inspect_<screen>_<config>.png`,
+        // where <screen> is a single token (no underscores) — the canonical screen id
+        // (`songs`, `field`, `picker`) shared with the evaluator's `_eval_findings.jsonl`,
+        // so both lanes cluster on the same screen in the ledger. Split on the first
+        // underscore: leading token -> screen, remainder -> config. E.g.
+        // "_inspect_songs_long_compact_font1_5_dark.png" -> ("songs", "long_compact_font1_5_dark").
         val core = label.removePrefix("_inspect_").removeSuffix(".png")
         val sep = core.indexOf('_')
         return if (sep > 0) core.substring(0, sep) to core.substring(sep + 1)

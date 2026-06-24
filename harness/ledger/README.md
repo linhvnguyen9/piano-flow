@@ -35,11 +35,20 @@ Self-test for the aggregator: `python3 harness/bin/test_aggregate_ledger.py`.
 
 ## Row schema (one JSON object per line)
 
+**Screen id (canonical).** Findings cluster per screen, so both lanes must agree on the name. The
+deterministic Tier-1 sidecar emits the inspection PNG's leading filename slug (`songs`, `field`,
+`picker`); the LLM evaluator tends to emit the composable name (`SongsScreen`). Rather than trust the
+LLM, `aggregate_ledger.py` canonicalizes every `screen` through **`screen-aliases.json`** (beside
+this file) — a `{ "SongsScreen": "songs", … }` map, keys matched case/punctuation-insensitively.
+**Add an entry whenever a new screen or a new evaluator phrasing appears**; unmapped names fall back
+to a lowercased, alnum-stripped form. `category` names the **defect** (e.g. `touch-target`), never
+the fix (`reuse`) — that one is evaluator guidance the aggregator can't enforce.
+
 ```json
 {
   "ts": "2026-06-22T10:00:00Z",
-  "screen": "SongsScreen",
-  "config": "360_font2_0_dark",
+  "screen": "songs",
+  "config": "long_compact_font1_5_dark",
   "loop": "impl",
   "role": "tier1 | evaluator",
   "tier": 1,

@@ -139,6 +139,40 @@ def test_ledger_not_globbed_as_sidecar():
         assert sidecars == [], sidecars
 
 
+def test_screen_canonicalization_reconciles_lanes():
+    # The two lanes name the same screen differently — Tier-1 emits the filename slug
+    # ("songs"), the evaluator the composable name ("SongsScreen"). The alias file must
+    # collapse both to one canonical id so /ui-distill clusters per screen.
+    with tempfile.TemporaryDirectory() as d:
+        d = Path(d)
+        ledger = d / "harness" / "ledger" / "findings.jsonl"
+        ledger.parent.mkdir(parents=True)
+        (ledger.parent / "screen-aliases.json").write_text(
+            json.dumps({"SongsScreen": "songs", "ChordProgressionField": "field"})
+        )
+        rob = d / "m" / "build" / "outputs" / "roborazzi"
+        rob.mkdir(parents=True)
+        (rob / "_findings.jsonl").write_text(_tier1_line("songs", "411", "Btn", "tiny") + "\n")
+        (rob / "_eval_findings.jsonl").write_text(_eval_line("SongsScreen", "411", "Title", "cramped") + "\n")
+
+        agg.aggregate(ledger, agg.find_sidecars(d, [agg.DEFAULT_GLOB], ledger))
+        rows = _read_ledger(ledger)
+        assert sorted({r["screen"] for r in rows}) == ["songs"], [r["screen"] for r in rows]
+
+
+def test_unmapped_screen_falls_back_to_normalized():
+    # No alias file: a screen still gets lowercased/alnum-stripped so casing can't split it.
+    with tempfile.TemporaryDirectory() as d:
+        d = Path(d)
+        ledger = d / "harness" / "ledger" / "findings.jsonl"
+        ledger.parent.mkdir(parents=True)
+        rob = d / "m" / "build" / "outputs" / "roborazzi"
+        rob.mkdir(parents=True)
+        (rob / "_findings.jsonl").write_text(_tier1_line("New Screen", "411", "B", "x") + "\n")
+        agg.aggregate(ledger, agg.find_sidecars(d, [agg.DEFAULT_GLOB], ledger))
+        assert _read_ledger(ledger)[0]["screen"] == "newscreen"
+
+
 def main():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for t in tests:

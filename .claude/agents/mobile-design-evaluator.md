@@ -38,8 +38,12 @@ guess — return a verdict of `fail` stating the harness has not been run, and g
    for Tier-1 (structural blockers), Tier-2 (weighted taste), the anti-patterns, and the verdict
    format. Do not grade from memory; the rubric evolves. Follow its ordering: structural first.
 
-2. **Enumerate the matrix.** List the PNGs and decode each filename into its config so you can
-   attribute every defect to a *specific* config. Conventional tokens in this project's names:
+2. **Enumerate the matrix.** Filenames are `_inspect_<screen>_<config>.png`. Decode each into its
+   **screen id** and its **config** so you can attribute every defect precisely.
+   - **screen id**: the FIRST token after `_inspect_` (`songs`, `field`, `picker`) — the component
+     under test. Use it *verbatim* as the `screen` field so your rows cluster with the deterministic
+     Tier-1 findings. One inspection dir can mix components (e.g. `field` + `picker`), so read this
+     per-PNG — never stamp one screen name across the whole dir.
    - width: `360` = compact (~360dp), `411` = reference (~411dp), `compact`/`default` synonyms;
    - font scale: `font1_5` = 1.5, `font2_0` = 2.0, otherwise 1.0;
    - theme: a `_dark` suffix = dark mode, else light;
@@ -75,12 +79,19 @@ guess — return a verdict of `fail` stating the harness has not been run, and g
    `harness/ledger/findings.jsonl`; see `harness/ledger/README.md`):
 
    ```json
-   {"ts":"<ISO8601 UTC>","screen":"<ScreenName>","config":"<from step 2, e.g. 360_font2_0_dark>","loop":"impl","role":"evaluator","tier":1,"category":"<rubric vocab: spacing|hierarchy|color|typography|truncation|overlap|insets|reuse|fidelity|...>","severity":"blocker|warn|nit","element":"<element>","finding":"<what's wrong, where>","fix":"<concrete fix>","iteration":null,"resolved":false,"deposit":null}
+   {"ts":"<ISO8601 UTC>","screen":"<screen id — the filename's leading token, e.g. songs/field/picker>","config":"<from step 2, e.g. long_compact_font1_5_dark>","loop":"impl","role":"evaluator","tier":1,"category":"<the DEFECT, see vocab below>","severity":"blocker|warn|nit","element":"<element>","finding":"<what's wrong, where>","fix":"<concrete fix>","iteration":null,"resolved":false,"deposit":null}
    ```
 
    Get the timestamp with `date -u +%Y-%m-%dT%H:%M:%SZ` (Bash). Use `tier` 1 for structural blockers,
    2 for taste; set `severity` to `blocker` for any Tier-1 hit. Leave `iteration` null — the
    aggregator stamps it. Do **not** run the aggregator yourself; the dispatcher owns that.
+
+   **`category` names the DEFECT, not the fix.** Pick from the controlled vocabulary:
+   `touch-target · zero-size · out-of-bounds · overflow · truncation · overlap · insets · contrast ·
+   spacing · hierarchy · color · typography · state · affordance · reuse · fidelity`. An undersized
+   tap target is `touch-target` even when the fix is "wrap in `AppIconButton`"; reserve `reuse` for a
+   *reinvented* component and `fidelity` for a delta vs a design target. Categorizing by defect keeps
+   the ledger's per-category recurrence — the signal `/ui-distill` promotes on — meaningful.
 
 ## Discipline
 

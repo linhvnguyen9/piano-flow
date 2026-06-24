@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -56,11 +57,44 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def normalize(obj: dict, default_iteration=None) -> dict:
+SCREEN_ALIAS_FILE = "screen-aliases.json"
+
+
+def _norm_screen_key(s) -> str:
+    """Lowercase, strip non-alphanumerics — absorbs casing/spacing variance."""
+    return re.sub(r"[^a-z0-9]", "", str(s).lower())
+
+
+def load_screen_aliases(ledger_path) -> dict:
+    """Load {alias -> canonical} from `screen-aliases.json` beside the ledger (keys normalized).
+
+    Reconciles the two lanes' screen names: the deterministic Tier-1 sidecar emits the PNG-filename
+    slug (`songs`), while the LLM evaluator tends to emit the composable name (`SongsScreen`).
+    Canonicalizing here — not in the evaluator — keeps screen identity deterministic regardless of
+    what the LLM writes. Missing/invalid file → no aliases (screens are merely lowercased)."""
+    p = Path(ledger_path).parent / SCREEN_ALIAS_FILE
+    if not p.exists():
+        return {}
+    try:
+        raw = json.loads(p.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        print(f"warning: {p} is not valid JSON; ignoring screen aliases", file=sys.stderr)
+        return {}
+    return {_norm_screen_key(k): v for k, v in raw.items()}
+
+
+def canonical_screen(s, aliases) -> str:
+    """Map a raw screen name to its canonical slug via the alias table; fall back to a normalized
+    (lowercased, alnum-only) key so casing/spacing alone can never split one screen into two."""
+    key = _norm_screen_key(s)
+    return aliases.get(key, key or "unknown")
+
+
+def normalize(obj: dict, default_iteration=None, aliases=None) -> dict:
     """Coerce a raw finding into the canonical schema with sane defaults."""
     out = {
         "ts": obj.get("ts") or _now_iso(),
-        "screen": obj.get("screen", "unknown"),
+        "screen": canonical_screen(obj.get("screen", "unknown"), aliases or {}),
         "config": obj.get("config", ""),
         "loop": obj.get("loop", "impl"),
         "role": obj.get("role", "unknown"),
@@ -125,6 +159,7 @@ def find_sidecars(root: Path, patterns, ledger_path: Path):
 def aggregate(ledger_path, sidecar_paths, iteration=None, dry_run=False, keep_sidecars=False):
     """Fold sidecars into the ledger. Returns a summary dict."""
     ledger_path = Path(ledger_path)
+    aliases = load_screen_aliases(ledger_path)
     raw = []
     consumed = []
     malformed_total = 0
@@ -133,7 +168,7 @@ def aggregate(ledger_path, sidecar_paths, iteration=None, dry_run=False, keep_si
         findings, malformed = read_sidecar(path)
         malformed_total += malformed
         if findings:
-            raw.extend(normalize(f, default_iteration=iteration) for f in findings)
+            raw.extend(normalize(f, default_iteration=iteration, aliases=aliases) for f in findings)
         # A sidecar is consumed even if empty/all-malformed, so stale files clear.
         consumed.append(path)
 
