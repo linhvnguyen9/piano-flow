@@ -63,5 +63,25 @@ the fix (`reuse`) — that one is evaluator guidance the aggregator can't enforc
 }
 ```
 
-`deposit` is set by the (future) distill step when a finding is promoted to a permanent gate,
-lint rule, component, or token — marking it as having ratcheted down the durability ladder.
+`deposit` is set by the distill step when a finding is promoted to a permanent gate, lint rule,
+component, or token — marking it as having ratcheted down the durability ladder.
+
+## Distilling (promote recurring findings)
+
+`distill_ledger.py` is the ratchet's act-half. It clusters **open** findings (not `resolved`, no
+`deposit`) by `category`, flags every category at/over the threshold (default 3) as a pattern, maps
+it to the most permanent substrate on the durability ladder (spec §7), and writes proposals to
+`promotions.md` (regenerated each run → gitignored; the durable record is the `deposit` label below
+plus the committed gate). Run it via the `/ui-distill` command, which adds the human-approval and
+implement-then-delete-soft-guidance steps.
+
+```bash
+python3 harness/bin/distill_ledger.py                 # analyze -> promotions.md
+python3 harness/bin/distill_ledger.py --threshold 1   # promote even one-off blockers
+python3 harness/bin/distill_ledger.py --deposit touch-target --label "Tier1Assertions min-size (#123)"
+```
+
+The `--deposit` mode is the **one sanctioned in-place mutation** of the ledger (capture appends;
+distill closes out): it stamps `resolved=true` + `deposit=<label>` on a category's open findings, so
+they stop surfacing as candidates and feed `/ui-metrics`' recurrence-after-deposit signal — if a
+deposited category keeps recurring, the promotion didn't stick. Self-test: `python3 harness/bin/test_distill_ledger.py`.

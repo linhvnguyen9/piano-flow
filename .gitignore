@@ -19,6 +19,7 @@ captures
 node_modules/
 __pycache__/
 *.pyc
+harness/ledger/promotions.md
 
 # Superpowers planning artifacts (brainstorm specs / implementation plans) — kept local, not committed
 docs/superpowers/specs/
