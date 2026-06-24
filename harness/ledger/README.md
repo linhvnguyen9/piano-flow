@@ -85,3 +85,11 @@ The `--deposit` mode is the **one sanctioned in-place mutation** of the ledger (
 distill closes out): it stamps `resolved=true` + `deposit=<label>` on a category's open findings, so
 they stop surfacing as candidates and feed `/ui-metrics`' recurrence-after-deposit signal — if a
 deposited category keeps recurring, the promotion didn't stick. Self-test: `python3 harness/bin/test_distill_ledger.py`.
+
+## Metrics (is it compounding?)
+
+`metrics_ledger.py` (via `/ui-metrics`) renders three numbers to `metrics.md` (regenerated →
+gitignored): **iterations-to-pass** per screen (↓), **first-pass yield** (↑ — screens with zero
+Tier-1 findings at iteration 1), and **recurrence after deposit** (→ 0 — open findings in a
+already-promoted category; non-zero means the promotion didn't stick and should ratchet down a
+tier). Read-only. Self-test: `python3 harness/bin/test_metrics_ledger.py`.

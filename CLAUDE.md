@@ -62,7 +62,7 @@ python3 harness/bin/aggregate_ledger.py          # collect sidecars -> harness/l
 python3 harness/bin/aggregate_ledger.py --iteration 2   # stamp the loop iteration
 ```
 
-This is the *capture* half of the self-improvement ratchet; `/ui-distill` (`harness/bin/distill_ledger.py`) clusters these findings into promotion proposals along the durability ladder, and the (not-yet-built) `/ui-metrics` trends them. Schema, dedup semantics, and the aggregator self-test (`test_aggregate_ledger.py`) are documented in `harness/ledger/README.md`. Don't hand-edit `findings.jsonl`; let the aggregator append.
+This is the *capture* half of the self-improvement ratchet; `/ui-distill` (`harness/bin/distill_ledger.py`) clusters these findings into promotion proposals along the durability ladder, and `/ui-metrics` (`harness/bin/metrics_ledger.py`) trends iterations-to-pass, first-pass yield, and recurrence-after-deposit. Schema, dedup semantics, and the aggregator self-test (`test_aggregate_ledger.py`) are documented in `harness/ledger/README.md`. Don't hand-edit `findings.jsonl`; let the aggregator append.
 
 ## Component catalog (check before building new UI)
 
