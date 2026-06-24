@@ -93,6 +93,20 @@ Full workflow doc: `docs/SCREENSHOT_TESTING.md`. Things easy to trip on:
 - Roborazzi mode is passed as a Gradle project property (`-Proborazzi.test.record=true` / `verify=true` / `compare=true`) and is registered as a task input — switching modes invalidates the cache automatically; no `--rerun-tasks` needed.
 - **`verify` fails inspection tests on a clean `build/`.** Inspection tests have no committed golden, so `-Proborazzi.test.verify=true` errors ("image not found") unless the `_inspect_*.png` was already recorded. Run `record` once to seat them, then `verify`. Regression goldens (committed) verify normally.
 
+## Architecture boundary rules (Konsist)
+
+Module-boundary invariants are enforced as JVM unit tests via [Konsist](https://docs.konsist.lemonappdev.com) (it parses source from disk — no Gradle plugin, so it dodges the KMP source-set wiring and AGP-9 plugin-compat traps that make Detekt awkward here; same "rule as a host test" shape as `Tier1Assertions`). The rules live in `androidApp/src/test/kotlin/com/linh/pianoflow/architecture/ArchitectureTest.kt` (alongside the other repo-wide tests) and run with:
+
+```bash
+./gradlew :androidApp:testDebugUnitTest --tests "com.linh.pianoflow.architecture.ArchitectureTest"
+```
+
+Enforced today: **`core/*` must not depend on `feature/*`**, and **a feature's `api` must not import its `impl`** — caught the moment a bad import is written.
+
+Feature code uses Material 3 primitives (`Text`, `Surface`, `Button`, chips, `ModalBottomSheet`, `MaterialTheme.colorScheme`/`typography`, …) **directly** — `PianoFlowTheme {}` already themes them, so there's nothing to gate. (An earlier rule banning raw `androidx.compose.material3.*` in feature code was dropped as too restrictive — a pure-passthrough `AppText`/`AppSurface` is just indirection.) Reach for a `core:designsystem` wrapper only when it **enforces something** — e.g. `AppIconButton` guarantees a 48dp touch target that M3's `IconButton` doesn't expose to semantics. Don't add 1:1 passthrough wrappers.
+
+Experimental Material 3 APIs (e.g. `ModalBottomSheet`) need no per-file `@OptIn`: the `pianoflow.kmp.compose` convention plugin opts in project-wide via `compilerOptions { optIn.add("androidx.compose.material3.ExperimentalMaterial3Api") }`. Add other broadly-used opt-in markers there too rather than annotating each file.
+
 ## Build basics
 
 - Android SDKs: `compileSdk = 36`, `minSdk = 24`. AGP 9.0.1, Gradle 9.1, Kotlin 2.4.0, CMP 1.11.1.

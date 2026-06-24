@@ -38,6 +38,7 @@ dependencies {
     debugImplementation(libs.compose.uiTooling)
 
     testImplementation(libs.junit)
+    testImplementation(libs.konsist)
     testImplementation(libs.kotlin.testJunit)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.compose.ui.testJunit4)

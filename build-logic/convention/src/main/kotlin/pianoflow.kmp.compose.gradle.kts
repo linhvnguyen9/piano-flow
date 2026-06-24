@@ -14,6 +14,10 @@ fun lib(alias: String) = libs.findLibrary(alias).get()
 val moduleNamespace = pianoflowNamespace()
 
 kotlin {
+    compilerOptions {
+        optIn.add("androidx.compose.material3.ExperimentalMaterial3Api")
+    }
+
     androidLibrary {
         namespace = moduleNamespace
         compileSdk = libs.findVersion("android-compileSdk").get().requiredVersion.toInt()

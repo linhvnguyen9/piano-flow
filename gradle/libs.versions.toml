@@ -22,6 +22,7 @@ enro = "3.0.0-beta02"
 ksp = "2.3.9"
 kotlinxSerialization = "1.7.3"
 showkase = "1.0.5"
+konsist = "0.17.3"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -72,6 +73,8 @@ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 showkase = { module = "com.airbnb.android:showkase", version.ref = "showkase" }
 showkase-processor = { module = "com.airbnb.android:showkase-processor", version.ref = "showkase" }
+
+konsist = { module = "com.lemonappdev:konsist", version.ref = "konsist" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
