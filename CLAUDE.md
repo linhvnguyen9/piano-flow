@@ -125,3 +125,5 @@ Experimental Material 3 APIs (e.g. `ModalBottomSheet`) need no per-file `@OptIn`
 - `build-logic/` — convention plugins.
 - `docs/superpowers/specs/`, `docs/superpowers/plans/` — design docs and implementation plans (gitignored).
 - `docs/adr/` — architecture decision records.
+- `docs/HARNESS.md` — the UI harness overview (prose + node→file legend); the diagram it references lives in `docs/diagrams/`.
+- `docs/diagrams/` — Mermaid diagrams, **one per file**: a dedicated `.mermaid` file (raw Mermaid source — no markdown wrapper). Always give a diagram its own file under here and reference it from prose docs — never inline a diagram into a content doc.
