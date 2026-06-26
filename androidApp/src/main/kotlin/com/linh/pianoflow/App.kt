@@ -25,10 +25,7 @@ fun App() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,
         ) {
-            // Background fills edge-to-edge. Inset the content from the status bar
-            // and home indicator (vertical) only — the screen owns its horizontal
-            // 24dp margin, so applying safe-area padding on both axes would double it.
-            Box(modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical))) {
+            SafeAreaContainer {
                 val container = rememberNavigationContainer(
                     backstack = backstackOf(SongsKey.asInstance()),
                 )
@@ -36,4 +33,24 @@ fun App() {
             }
         }
     }
+}
+
+/**
+ * Edge-to-edge content container. The background fills the whole window; this pads
+ * [content] by [insets] — the **vertical** safe area by default (status bar + home
+ * indicator) only, because screens own their horizontal 24dp margin and padding both
+ * axes would double it.
+ *
+ * Extracted from [App] so the inset contract is a named, testable seam: `AppInsetsTest`
+ * renders it with injected non-zero insets and asserts the content clears them. This is
+ * the app-layer Tier-1 inset assertion — feature content composables deliberately do NOT
+ * pad insets (App does it for them), so the check lives here, not in the feature module.
+ */
+@Composable
+internal fun SafeAreaContainer(
+    modifier: Modifier = Modifier,
+    insets: WindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical),
+    content: @Composable () -> Unit,
+) {
+    Box(modifier = modifier.windowInsetsPadding(insets)) { content() }
 }

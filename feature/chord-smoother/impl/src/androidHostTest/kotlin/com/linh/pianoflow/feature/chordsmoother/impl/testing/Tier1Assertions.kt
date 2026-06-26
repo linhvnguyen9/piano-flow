@@ -41,11 +41,11 @@ import java.time.Instant
  *    tagging is how callers opt critical labels into the "must not truncate"
  *    contract.
  *
- * Not yet implemented (kept here so the gap is visible):
- *
- *  - **insets**: requires injecting non-zero `WindowInsets` into the test host and
- *    asserting top-level scaffold content sits below them. The current inspection
- *    tests don't inject insets, so the check would be a no-op.
+ * **insets** are asserted at the app layer (`AppInsetsTest` in `:androidApp`), not here:
+ * insets are owned by `App()`'s `SafeAreaContainer`, and feature content composables
+ * deliberately do NOT pad insets (App does — padding here would double-pad). That test
+ * injects non-zero `WindowInsets` via `DeviceConfigurationOverride` and asserts the content
+ * clears the status bar.
  */
 object Tier1Assertions {
 
