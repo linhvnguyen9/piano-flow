@@ -17,6 +17,14 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
+__pycache__/
+*.pyc
+harness/ledger/promotions.md
+harness/ledger/metrics.md
+
+# oh-my-claudecode orchestration state (local tooling, not project content)
+.omc/
+harness/ledger/metrics.md
 
 # Superpowers planning artifacts (brainstorm specs / implementation plans) — kept local, not committed
 docs/superpowers/specs/

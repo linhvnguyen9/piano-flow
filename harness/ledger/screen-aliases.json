@@ -1,0 +1,8 @@
+{
+  "SongsScreen": "songs",
+  "SongsScreenContent": "songs",
+  "ChordProgressionField": "field",
+  "ChordPicker": "picker",
+  "ChordPickerSheet": "picker",
+  "ChordPickerContent": "picker"
+}

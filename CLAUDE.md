@@ -42,14 +42,27 @@ Then `Read feature/chord-smoother/impl/build/outputs/roborazzi/_inspect_songs_de
 
 ## Executor-evaluator UI loop (after any @Composable change)
 
-Pair the inspection matrix with a separate **evaluator** so UI work is graded, not just rendered. Keep the two lanes apart — the context that edits a `@Composable` must not also grade it (that's self-review). The loop:
+Pair the inspection matrix with a separate **evaluator** so UI work is graded, not just rendered. Keep the two lanes apart — the context that edits a `@Composable` must not also grade it (that's self-review).
+
+**`/ui-iterate <ScreenName>` drives this loop end to end** — boundary gate → render+Tier-1 → evaluate → aggregate to the ledger, capped at 4 iterations with human escalation (see `.claude/commands/ui-iterate.md`). The steps below are what it does, and the manual recipe when driving by hand. The loop:
 
 1. **Executor** edits the `@Composable`.
 2. **Render** the matrix: `./gradlew :<module>:testAndroidHostTest --tests "...<Screen>Inspection" -Proborazzi.test.record=true` → `build/outputs/roborazzi/_inspect_*.png`.
 3. **Evaluate** in a separate lane: dispatch the `mobile-design-evaluator` agent (defined in `.claude/agents/mobile-design-evaluator.md`) at the PNG directory. It loads the `mobile-design` skill, reads every PNG, and writes a `pass`/`fail` verdict with element-level fixes to `_verdict.md` beside them. It never edits source.
 4. **Read `_verdict.md`**, apply the Tier-1 fixes, loop from step 2 until the verdict passes. Ship on `pass` (Tier-2 issues become follow-ups).
 
-Dispatch it by name (`subagent_type: "mobile-design-evaluator"`), or have a generic agent `Read` and follow `.claude/agents/mobile-design-evaluator.md`. Inspection PNG filenames encode their config (`360`/`411`, `font1_5`/`font2_0`, `_dark`, state words) so the evaluator can attribute each defect to a specific config — keep new captures self-describing.
+Dispatch it by name (`subagent_type: "mobile-design-evaluator"`), or have a generic agent `Read` and follow `.claude/agents/mobile-design-evaluator.md`. Inspection PNG filenames are `_inspect_<screen>_<config>.png`: the **leading token** is the canonical **screen id** (`songs`/`field`/`picker`, a single token — no underscores), and the rest encodes config (`360`/`411`, `font1_5`/`font2_0`, `_dark`, state words). Both lanes key ledger findings on that screen id (Tier-1 parses it; the evaluator copies it), so `/ui-distill` clusters per screen — keep new captures self-describing and use a single-token slug.
+
+### Feedback ledger (capture every finding)
+
+Both lanes emit findings to gitignored, build-local sidecars: `Tier1Assertions` writes `<module>/build/outputs/roborazzi/_findings.jsonl`; the evaluator writes `_eval_findings.jsonl` beside its `_verdict.md`. After a render + evaluate pass, fold them into the durable, committed ledger:
+
+```bash
+python3 harness/bin/aggregate_ledger.py          # collect sidecars -> harness/ledger/findings.jsonl
+python3 harness/bin/aggregate_ledger.py --iteration 2   # stamp the loop iteration
+```
+
+This is the *capture* half of the self-improvement ratchet; `/ui-distill` (`harness/bin/distill_ledger.py`) clusters these findings into promotion proposals along the durability ladder, and `/ui-metrics` (`harness/bin/metrics_ledger.py`) trends iterations-to-pass, first-pass yield, and recurrence-after-deposit. Schema, dedup semantics, and the aggregator self-test (`test_aggregate_ledger.py`) are documented in `harness/ledger/README.md`. Don't hand-edit `findings.jsonl`; let the aggregator append.
 
 ## Component catalog (check before building new UI)
 
@@ -82,6 +95,20 @@ Full workflow doc: `docs/SCREENSHOT_TESTING.md`. Things easy to trip on:
 - Roborazzi mode is passed as a Gradle project property (`-Proborazzi.test.record=true` / `verify=true` / `compare=true`) and is registered as a task input — switching modes invalidates the cache automatically; no `--rerun-tasks` needed.
 - **`verify` fails inspection tests on a clean `build/`.** Inspection tests have no committed golden, so `-Proborazzi.test.verify=true` errors ("image not found") unless the `_inspect_*.png` was already recorded. Run `record` once to seat them, then `verify`. Regression goldens (committed) verify normally.
 
+## Architecture boundary rules (Konsist)
+
+Module-boundary invariants are enforced as JVM unit tests via [Konsist](https://docs.konsist.lemonappdev.com) (it parses source from disk — no Gradle plugin, so it dodges the KMP source-set wiring and AGP-9 plugin-compat traps that make Detekt awkward here; same "rule as a host test" shape as `Tier1Assertions`). The rules live in `androidApp/src/test/kotlin/com/linh/pianoflow/architecture/ArchitectureTest.kt` (alongside the other repo-wide tests) and run with:
+
+```bash
+./gradlew :androidApp:testDebugUnitTest --tests "com.linh.pianoflow.architecture.ArchitectureTest"
+```
+
+Enforced today: **`core/*` must not depend on `feature/*`**, and **a feature's `api` must not import its `impl`** — caught the moment a bad import is written.
+
+Feature code uses Material 3 primitives (`Text`, `Surface`, `Button`, chips, `ModalBottomSheet`, `MaterialTheme.colorScheme`/`typography`, …) **directly** — `PianoFlowTheme {}` already themes them, so there's nothing to gate. (An earlier rule banning raw `androidx.compose.material3.*` in feature code was dropped as too restrictive — a pure-passthrough `AppText`/`AppSurface` is just indirection.) Reach for a `core:designsystem` wrapper only when it **enforces something** — e.g. `AppIconButton` guarantees a 48dp touch target that M3's `IconButton` doesn't expose to semantics. Don't add 1:1 passthrough wrappers.
+
+Experimental Material 3 APIs (e.g. `ModalBottomSheet`) need no per-file `@OptIn`: the `pianoflow.kmp.compose` convention plugin opts in project-wide via `compilerOptions { optIn.add("androidx.compose.material3.ExperimentalMaterial3Api") }`. Add other broadly-used opt-in markers there too rather than annotating each file.
+
 ## Build basics
 
 - Android SDKs: `compileSdk = 36`, `minSdk = 24`. AGP 9.0.1, Gradle 9.1, Kotlin 2.4.0, CMP 1.11.1.
@@ -98,3 +125,5 @@ Full workflow doc: `docs/SCREENSHOT_TESTING.md`. Things easy to trip on:
 - `build-logic/` — convention plugins.
 - `docs/superpowers/specs/`, `docs/superpowers/plans/` — design docs and implementation plans (gitignored).
 - `docs/adr/` — architecture decision records.
+- `docs/HARNESS.md` — the UI harness overview (prose + node→file legend); the diagram it references lives in `docs/diagrams/`.
+- `docs/diagrams/` — Mermaid diagrams, **one per file**: a dedicated `.mermaid` file (raw Mermaid source — no markdown wrapper). Always give a diagram its own file under here and reference it from prose docs — never inline a diagram into a content doc.

@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.linh.pianoflow.core.designsystem.theme.BottomSheet
 import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
+import com.linh.pianoflow.feature.chordsmoother.impl.testing.Tier1Assertions
 import com.linh.pianoflow.core.model.Chord
 import com.linh.pianoflow.core.model.Quality
 import org.junit.Rule
@@ -113,6 +114,7 @@ class ChordPickerInspection {
         }
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage(filePath = "build/outputs/roborazzi/$name")
+        Tier1Assertions.assertAll(composeRule, label = name)
     }
 
     /** Wrap [content] in the theme + an appropriate Surface, then snapshot it. */
@@ -133,6 +135,7 @@ class ChordPickerInspection {
         }
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage(filePath = "build/outputs/roborazzi/$name")
+        Tier1Assertions.assertAll(composeRule, label = name)
     }
 }
 

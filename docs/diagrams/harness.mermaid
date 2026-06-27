@@ -1,0 +1,48 @@
+%% Harness architecture (as built). Prose, node-to-file legend, and gaps: ../HARNESS.md
+flowchart TB
+    subgraph rails["Prevention rails — make mistakes hard upstream"]
+        direction LR
+        CM["CLAUDE.md UI rules"]
+        KON["Konsist ArchitectureTest<br/>core ↛ feature · api ↛ impl"]
+        DS["core:designsystem + tokens<br/>reuse · AppColors / Spacing / AppType"]
+    end
+    subgraph loop["Implementation loop — /ui-iterate · max 4 iterations"]
+        EX["Executor edits @Composable"]
+        G1{"Konsist gate"}
+        REN["Render matrix → _inspect_*.png<br/>Tier1Assertions · AppInsetsTest"]
+        T1{"Tier-1 clean?"}
+        EV["mobile-design-evaluator<br/>fresh lane → _verdict.md"]
+        DEC{"verdict"}
+        ESC["escalate to human"]
+        SHIP["ship"]
+        EX --> G1
+        G1 -->|fail| EX
+        G1 -->|pass| REN
+        REN --> T1
+        T1 -->|blocker| EX
+        T1 -->|clean| EV
+        EV --> DEC
+        DEC -->|fail · retry| EX
+        DEC -->|max iters| ESC
+        DEC -->|pass| SHIP
+    end
+    subgraph capture["Feedback ledger — capture"]
+        SIDE["sidecars<br/>_findings.jsonl · _eval_findings.jsonl"]
+        AGG["aggregate_ledger.py<br/>+ screen-aliases.json"]
+        LED[("harness/ledger/findings.jsonl")]
+        SIDE --> AGG --> LED
+    end
+    subgraph ratchet["Self-improvement ratchet — act"]
+        DIST["/ui-distill · distill_ledger.py<br/>cluster · threshold · durability ladder"]
+        PROM["promotions.md<br/>human approval"]
+        DEP["deposit<br/>Tier-1 assertion · Konsist rule<br/>designsystem component · rubric line"]
+        MET["/ui-metrics · metrics_ledger.py<br/>iters-to-pass · first-pass yield · recurrence"]
+        DIST --> PROM --> DEP
+    end
+    rails -. constrains .-> EX
+    T1 -. findings .-> SIDE
+    EV -. findings .-> SIDE
+    LED --> DIST
+    LED --> MET
+    DEP -. harden upstream .-> rails
+    MET -. recurrence persists .-> DIST

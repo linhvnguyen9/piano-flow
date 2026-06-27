@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
@@ -56,7 +55,6 @@ private val QUALITY_GROUPS: List<Pair<String, List<Pair<Quality, String>>>> = li
     "Sixths" to listOf(Quality.MAJ6 to "6", Quality.MIN6 to "m6"),
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChordPickerSheet(
     initial: Chord?,
