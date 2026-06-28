@@ -7,7 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.airbnb.android.showkase.annotation.ShowkaseComposable
+import com.linh.pianoflow.core.designsystem.MusicStaff
 import com.linh.pianoflow.core.designsystem.PianoKeyboard
+import com.linh.pianoflow.core.designsystem.StaffNoteState
 import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
 
 /**
@@ -26,6 +28,22 @@ fun PianoKeyboardShowcase() {
                 highlighted = setOf(60, 64, 67),
                 labels = true,
                 modifier = Modifier.fillMaxWidth().padding(8.dp),
+            )
+        }
+    }
+}
+
+@ShowkaseComposable(name = "MusicStaff", group = "DesignSystem")
+@Composable
+fun MusicStaffShowcase() {
+    PianoFlowTheme {
+        Surface {
+            MusicStaff(
+                midi = 67, // G4 on the treble clef
+                state = StaffNoteState.Default,
+                space = 22.dp,
+                width = 240.dp,
+                modifier = Modifier.padding(8.dp),
             )
         }
     }

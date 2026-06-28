@@ -21,6 +21,8 @@ kotlin {
 dependencies {
     implementation(projects.feature.chordSmoother.api)
     implementation(projects.feature.chordSmoother.impl)
+    implementation(projects.feature.sightReading.api)
+    implementation(projects.feature.sightReading.impl)
     implementation(projects.core.designsystem)
 
     implementation(libs.androidx.activity.compose)
