@@ -30,6 +30,7 @@ data class SightReadingUiState(
     val heroNote: Int = 67,
     val staffState: StaffNoteState = StaffNoteState.Default,
     val showNoteName: Boolean = true,
+    val showMiddleC: Boolean = true,
     val noteName: String = "F4",
     val progressText: String = "1 / 20",
     val progressFraction: Float = 0f,

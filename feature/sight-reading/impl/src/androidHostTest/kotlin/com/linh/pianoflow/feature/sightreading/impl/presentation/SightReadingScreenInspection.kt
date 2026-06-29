@@ -145,13 +145,14 @@ class SightReadingScreenInspection {
                 onOpenSettings = {},
                 onCloseSettings = {},
                 onToggleNoteNames = {},
+                onToggleMiddleC = {},
             )
         }
 
     private fun captureSettings(dark: Boolean, fontScale: Float, state: SightReadingUiState, name: String) =
         capture(dark, fontScale, name) {
             Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surfaceContainerLow) {
-                SettingsSheetContent(state = state, onToggleNoteNames = {})
+                SettingsSheetContent(state = state, onToggleNoteNames = {}, onToggleMiddleC = {})
             }
         }
 

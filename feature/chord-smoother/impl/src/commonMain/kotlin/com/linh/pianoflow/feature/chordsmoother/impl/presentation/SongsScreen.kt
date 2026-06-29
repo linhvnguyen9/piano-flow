@@ -42,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -54,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.linh.pianoflow.core.designsystem.AppIconButton
 import com.linh.pianoflow.core.designsystem.PianoKeyboard
+import com.linh.pianoflow.core.designsystem.isExpandedFontScale
 import com.linh.pianoflow.core.designsystem.theme.Pill
 import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
 import com.linh.pianoflow.core.model.Chord
@@ -522,8 +522,8 @@ private fun InversionPicker(
 ) {
     // At accessibility font scales the label + ‹ › + Auto can't share one line without
     // truncating "Voicing X of Y" to "Voici", so the label moves to its own row above
-    // the controls. At 1.0 the compact single-row layout is kept.
-    val stacked = LocalDensity.current.fontScale >= 1.3f
+    // the controls. At 1.0 the compact single-row layout is kept. Shared reflow predicate.
+    val stacked = isExpandedFontScale()
     if (stacked) {
         Column(
             modifier = Modifier.fillMaxWidth(),

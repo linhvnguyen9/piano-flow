@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.linh.pianoflow.core.designsystem.StaffNoteState
 import com.linh.pianoflow.core.model.Pitch
 import com.linh.pianoflow.feature.sightreading.impl.domain.NoteRecord
+import com.linh.pianoflow.feature.sightreading.impl.domain.SightReadingSettings
 import com.linh.pianoflow.feature.sightreading.impl.domain.SightReadingSummary
 import com.linh.pianoflow.feature.sightreading.impl.domain.summarize
 import com.linh.pianoflow.feature.sightreading.impl.domain.whiteNotesIn
@@ -13,6 +14,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlin.time.TimeSource
 import kotlin.time.DurationUnit
@@ -29,7 +31,9 @@ import kotlin.time.DurationUnit
  * "Soon"). All timing-sensitive raw state lives in private fields; [publish] maps it to
  * the immutable [SightReadingUiState] the stateless screen renders.
  */
-class SightReadingViewModel : ViewModel() {
+class SightReadingViewModel(
+    private val settings: SightReadingSettings,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(SightReadingUiState())
     val state: StateFlow<SightReadingUiState> = _state.asStateFlow()
@@ -47,6 +51,7 @@ class SightReadingViewModel : ViewModel() {
     private var noteStart: TimeSource.Monotonic.ValueTimeMark? = null
 
     private var showNames = true
+    private var showMiddleC = true
     private var settingsOpen = false
 
     private var fbVisible = false
@@ -60,7 +65,18 @@ class SightReadingViewModel : ViewModel() {
     private var tickJob: Job? = null
     private val pending = mutableListOf<Job>()
 
-    init { publish() }
+    init {
+        publish()
+        // Seed from disk on creation and reflect any later change (e.g. a fresh VM after a
+        // tab switch re-reads the persisted toggles).
+        viewModelScope.launch {
+            settings.preferences.collect { prefs ->
+                showNames = prefs.showNoteNames
+                showMiddleC = prefs.showMiddleC
+                publish()
+            }
+        }
+    }
 
     // --- intents --------------------------------------------------------------
 
@@ -121,7 +137,19 @@ class SightReadingViewModel : ViewModel() {
 
     fun openSettings() { settingsOpen = true; publish() }
     fun closeSettings() { settingsOpen = false; publish() }
-    fun setShowNoteNames(value: Boolean) { showNames = value; publish() }
+    // Update locally for an instant toggle, then persist; the preferences flow re-emits the
+    // same value and reconciles (idempotent).
+    fun setShowNoteNames(value: Boolean) {
+        showNames = value
+        publish()
+        viewModelScope.launch { settings.setShowNoteNames(value) }
+    }
+
+    fun setShowMiddleC(value: Boolean) {
+        showMiddleC = value
+        publish()
+        viewModelScope.launch { settings.setShowMiddleC(value) }
+    }
 
     // --- flow -----------------------------------------------------------------
 
@@ -219,6 +247,7 @@ class SightReadingViewModel : ViewModel() {
             heroNote = HERO_NOTE,
             staffState = staffState,
             showNoteName = showNames,
+            showMiddleC = showMiddleC,
             noteName = Pitch.name(note),
             progressText = "${minOf(index + 1, SESSION_LENGTH)} / $SESSION_LENGTH",
             progressFraction = (index.toFloat() / SESSION_LENGTH).coerceIn(0f, 1f),

@@ -45,6 +45,7 @@ fun PianoKeyboard(
     highlighted: Set<Int>,
     modifier: Modifier = Modifier,
     labels: Boolean = false,
+    anchorMidi: Int? = null,
     onKeyTap: ((Int) -> Unit)? = null,
 ) {
     val whiteLit = MaterialTheme.colorScheme.primaryContainer
@@ -77,9 +78,17 @@ fun PianoKeyboard(
                         rowMod.testTag(PianoKeyTestTag).clickable { onKeyTap(midi) } else rowMod,
                     contentAlignment = Alignment.BottomCenter
                 ) {
-                    if (labels) {
+                    // `labels` names every key; `anchorMidi` names just one — a subtle
+                    // orientation landmark (e.g. middle C) so a learner has a key to count
+                    // from without every answer being given away.
+                    val keyLabel = when {
+                        labels -> Pitch.name(midi)
+                        midi == anchorMidi -> Pitch.NAMES[Pitch.pc(midi)]
+                        else -> null
+                    }
+                    if (keyLabel != null) {
                         Text(
-                            Pitch.name(midi),
+                            keyLabel,
                             color = whiteText,
                             fontSize = 9.sp,
                             modifier = Modifier.padding(bottom = 4.dp)

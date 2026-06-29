@@ -4,5 +4,8 @@
   "ChordProgressionField": "field",
   "ChordPicker": "picker",
   "ChordPickerSheet": "picker",
-  "ChordPickerContent": "picker"
+  "ChordPickerContent": "picker",
+  "SightReadingScreen": "sightreading",
+  "SightReadingScreenContent": "sightreading",
+  "SettingsSheetContent": "sightreading"
 }

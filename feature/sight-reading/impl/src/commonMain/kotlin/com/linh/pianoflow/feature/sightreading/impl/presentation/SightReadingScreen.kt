@@ -41,13 +41,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.linh.pianoflow.core.designsystem.AdaptiveRow
 import com.linh.pianoflow.core.designsystem.AppIconButton
 import com.linh.pianoflow.core.designsystem.MusicStaff
 import com.linh.pianoflow.core.designsystem.PianoKeyboard
@@ -71,6 +72,7 @@ fun SightReadingScreen(
         onOpenSettings = viewModel::openSettings,
         onCloseSettings = viewModel::closeSettings,
         onToggleNoteNames = viewModel::setShowNoteNames,
+        onToggleMiddleC = viewModel::setShowMiddleC,
     )
 }
 
@@ -83,6 +85,7 @@ fun SightReadingScreenContent(
     onOpenSettings: () -> Unit,
     onCloseSettings: () -> Unit,
     onToggleNoteNames: (Boolean) -> Unit,
+    onToggleMiddleC: (Boolean) -> Unit,
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(Modifier.fillMaxSize()) {
@@ -95,7 +98,11 @@ fun SightReadingScreenContent(
             if (state.settingsOpen) {
                 val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
                 ModalBottomSheet(onDismissRequest = onCloseSettings, sheetState = sheetState) {
-                    SettingsSheetContent(state = state, onToggleNoteNames = onToggleNoteNames)
+                    SettingsSheetContent(
+                        state = state,
+                        onToggleNoteNames = onToggleNoteNames,
+                        onToggleMiddleC = onToggleMiddleC,
+                    )
                 }
             }
         }
@@ -237,6 +244,10 @@ private fun DrillScreen(
                 startMidi = state.keyboardStart,
                 endMidi = state.keyboardEnd,
                 highlighted = state.litKeys,
+                // Middle-C landmark — its own learner toggle (independent of the staff note
+                // name); orients without revealing the target note. 60 = middle C, always
+                // within the C3–C5 range.
+                anchorMidi = if (state.showMiddleC) 60 else null,
                 onKeyTap = onKeyTap,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -333,23 +344,19 @@ private fun SummaryScreen(
 
 @Composable
 private fun StatRow(median: String, accuracy: String, notes: String) {
-    // At accessibility font scales the three fixed columns can't hold the mono value
-    // without clipping ("85%" → "85"); stack them full-width so each value shows in full
-    // and the labels stay un-abbreviated. Mirrors the Songs InversionPicker reflow.
-    val stacked = LocalDensity.current.fontScale >= 1.5f
-    if (stacked) {
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            StatCard("Median", median, Modifier.fillMaxWidth())
-            StatCard("Accuracy", accuracy, Modifier.fillMaxWidth())
-            StatCard("Notes", notes, Modifier.fillMaxWidth())
-        }
-    } else {
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), modifier = Modifier.fillMaxWidth()) {
-            StatCard("Median", median, Modifier.weight(1f))
-            StatCard("Accuracy", accuracy, Modifier.weight(1f))
-            StatCard("Notes", notes, Modifier.weight(1f))
-        }
-    }
+    // Three equal cards whose mono values clip in fixed columns at large font; the shared
+    // AdaptiveRow stacks them full-width at >= 1.5x so each value shows in full. The
+    // load-bearing values are tagged noTruncate (see StatCard) so Tier-1 catches any
+    // regression deterministically, without waiting on the vision evaluator.
+    AdaptiveRow(
+        modifier = Modifier.fillMaxWidth(),
+        stackAtFontScale = 1.5f,
+        items = listOf(
+            { m -> StatCard("Median", median, m) },
+            { m -> StatCard("Accuracy", accuracy, m) },
+            { m -> StatCard("Notes", notes, m) },
+        ),
+    )
 }
 
 @Composable
@@ -367,6 +374,9 @@ private fun StatCard(label: String, value: String, modifier: Modifier = Modifier
                 style = PianoFlowTheme.extendedTypography.musicData.copy(fontSize = 26.sp),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
+                // Load-bearing data: Tier-1 fails the build if this ever truly clips
+                // (the check counts dropped glyphs, not the noisy hasVisualOverflow flag).
+                modifier = Modifier.testTag("noTruncate"),
             )
         }
     }
@@ -406,6 +416,7 @@ private fun SlowNoteRow(slow: SlowNote) {
 internal fun SettingsSheetContent(
     state: SightReadingUiState,
     onToggleNoteNames: (Boolean) -> Unit,
+    onToggleMiddleC: (Boolean) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 28.dp)) {
         Text(
@@ -433,6 +444,26 @@ internal fun SettingsSheetContent(
                 )
             }
             Switch(checked = state.showNoteName, onCheckedChange = onToggleNoteNames)
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    "Mark middle C",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    "A landmark on the keyboard to count from.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Switch(checked = state.showMiddleC, onCheckedChange = onToggleMiddleC)
         }
 
         HorizontalDivider(

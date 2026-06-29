@@ -158,7 +158,18 @@ object Tier1Assertions {
         val getLayout = node.config.getOrNull(SemanticsActions.GetTextLayoutResult) ?: return false
         val results = mutableListOf<TextLayoutResult>()
         getLayout.action?.invoke(results)
-        return results.any { it.hasVisualOverflow }
+        // Real truncation = glyphs actually dropped from the last line (horizontal clip) or
+        // lines dropped by maxLines (vertical clip): the last *visible* char index is short
+        // of the text length. We deliberately do NOT use TextLayoutResult.hasVisualOverflow —
+        // it false-positives on legitimately-fitting single-line text whenever a non-zero
+        // letterSpacing / sub-pixel glyph advance pushes the painted width a hair past the
+        // layout width (reproducibly seen on mono numerals like "20"). getLineEnd(visibleEnd)
+        // counts only glyphs that were actually clipped.
+        return results.any { r ->
+            if (r.lineCount == 0) return@any false
+            val full = r.layoutInput.text.text.trimEnd().length
+            r.getLineEnd(r.lineCount - 1, visibleEnd = true) < full
+        }
     }
 
     private fun describe(node: SemanticsNode): String {
