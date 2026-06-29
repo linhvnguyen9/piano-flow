@@ -9,12 +9,12 @@ data class SightReadingPreferences(
 )
 
 /**
- * Port for reading + persisting [SightReadingPreferences]. The presentation layer depends
- * on this abstraction; the DataStore-backed adapter lives in `data/`. [preferences] emits
- * the current value and every subsequent change, so a freshly-created ViewModel re-seeds
- * from disk on launch (or after a tab switch).
+ * Repository for reading + persisting [SightReadingPreferences]. The presentation layer
+ * depends on this abstraction; the DataStore-backed `SightReadingSettingsRepositoryImpl`
+ * lives in `data/`. [preferences] emits the current value and every later change, so a
+ * freshly-created ViewModel re-seeds from disk on launch (or after a tab switch).
  */
-interface SightReadingSettings {
+interface SightReadingSettingsRepository {
     val preferences: Flow<SightReadingPreferences>
     suspend fun setShowNoteNames(value: Boolean)
     suspend fun setShowMiddleC(value: Boolean)

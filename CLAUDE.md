@@ -109,6 +109,14 @@ Feature code uses Material 3 primitives (`Text`, `Surface`, `Button`, chips, `Mo
 
 Experimental Material 3 APIs (e.g. `ModalBottomSheet`) need no per-file `@OptIn`: the `pianoflow.kmp.compose` convention plugin opts in project-wide via `compilerOptions { optIn.add("androidx.compose.material3.ExperimentalMaterial3Api") }`. Add other broadly-used opt-in markers there too rather than annotating each file.
 
+## File organization (keep context loads small)
+
+**Put each substantial, independently-editable composable in its own file**, so reading one file into context costs only what that task needs — not a whole screen. E.g. the settings sheet is `SettingsSheet.kt` (`SettingsSheetContent`), separate from `SightReadingScreen.kt`; editing the sheet doesn't pull in the drill/summary screens and vice-versa. Same for a reusable sub-component.
+
+But **don't split trivial, tightly-coupled glue** into its own file — that's just noise. A one-line Enro `@NavigationDestination` wrapper lives in the screen file next to the screen it renders (e.g. `SightReadingDestination` sits atop `SightReadingScreen.kt`), not in a `*Destination.kt`. Rule of thumb: split by *what you'd edit alone*; keep together what only ever changes together.
+
+**Don't repeat dependency/plugin wiring across module build files** — hoist it into a convention plugin in `build-logic/`. Cross-cutting setup (Compose-for-api via `pianoflow.kmp.compose.api`, Koin via `pianoflow.koin`) lives in a plugin; only module-specific deps (a feature's own DataStore, an extra icon pack) stay in the module's `build.gradle.kts`.
+
 ## Build basics
 
 - Android SDKs: `compileSdk = 36`, `minSdk = 24`. AGP 9.0.1, Gradle 9.1, Kotlin 2.4.0, CMP 1.11.1.

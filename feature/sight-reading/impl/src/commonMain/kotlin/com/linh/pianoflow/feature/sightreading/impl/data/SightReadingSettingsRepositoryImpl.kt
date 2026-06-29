@@ -5,18 +5,19 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import com.linh.pianoflow.feature.sightreading.impl.domain.SightReadingPreferences
-import com.linh.pianoflow.feature.sightreading.impl.domain.SightReadingSettings
+import com.linh.pianoflow.feature.sightreading.impl.domain.SightReadingSettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
- * [SightReadingSettings] backed by a Preferences [DataStore]. The actual store (with its
- * platform file location) is provided by the app — this adapter only knows the keys.
- * Missing keys fall back to the learner-friendly defaults (both aids on).
+ * [SightReadingSettingsRepository] backed by a Preferences [DataStore]. The store (with its
+ * platform file location) is provided via DI by the module's platform Koin module — this
+ * adapter only knows the keys. Missing keys fall back to the learner-friendly defaults
+ * (both aids on).
  */
-class SightReadingSettingsDataStore(
+class SightReadingSettingsRepositoryImpl(
     private val dataStore: DataStore<Preferences>,
-) : SightReadingSettings {
+) : SightReadingSettingsRepository {
 
     override val preferences: Flow<SightReadingPreferences> =
         dataStore.data.map { prefs ->

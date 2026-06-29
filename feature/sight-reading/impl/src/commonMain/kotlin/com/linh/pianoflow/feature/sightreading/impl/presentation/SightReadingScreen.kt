@@ -1,6 +1,5 @@
 package com.linh.pianoflow.feature.sightreading.impl.presentation
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,19 +14,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -37,10 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -54,9 +46,17 @@ import com.linh.pianoflow.core.designsystem.MusicStaff
 import com.linh.pianoflow.core.designsystem.PianoKeyboard
 import com.linh.pianoflow.core.designsystem.theme.Pill
 import com.linh.pianoflow.core.designsystem.theme.PianoFlowTheme
+import com.linh.pianoflow.feature.sightreading.api.SightReadingKey
 import com.linh.pianoflow.feature.sightreading.impl.domain.SlowNote
+import dev.enro.annotations.NavigationDestination
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
+
+@Composable
+@NavigationDestination(SightReadingKey::class)
+fun SightReadingDestination() {
+    SightReadingScreen()
+}
 
 @Composable
 fun SightReadingScreen(
@@ -410,107 +410,6 @@ private fun SlowNoteRow(slow: SlowNote) {
     }
 }
 
-// ============================ SETTINGS SHEET ============================
-
-@Composable
-internal fun SettingsSheetContent(
-    state: SightReadingUiState,
-    onToggleNoteNames: (Boolean) -> Unit,
-    onToggleMiddleC: (Boolean) -> Unit,
-) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 28.dp)) {
-        Text(
-            "Settings",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 18.dp),
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    "Show note names",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    "Letter name above the staff while you learn.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Switch(checked = state.showNoteName, onCheckedChange = onToggleNoteNames)
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    "Mark middle C",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    "A landmark on the keyboard to count from.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Switch(checked = state.showMiddleC, onCheckedChange = onToggleMiddleC)
-        }
-
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = 14.dp),
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
-        )
-
-        // "Soon" — clef & range is not yet configurable.
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).alpha(0.5f),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    "Clef & range",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    "Treble + bass · C3–C5 · naturals",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Text(
-                "SOON",
-                style = PianoFlowTheme.extendedTypography.labelCaps.copy(fontSize = 11.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            modifier = Modifier.fillMaxWidth().padding(top = 14.dp),
-        ) {
-            Text(
-                state.touchHint,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.5.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            )
-        }
-    }
-}
-
 // ============================ shared bits ============================
 
 @Composable
@@ -529,19 +428,12 @@ private fun PrimaryButton(label: String, onClick: () -> Unit) {
 
 @Composable
 private fun SettingsButton(onClick: () -> Unit) {
-    val tint = MaterialTheme.colorScheme.onSurfaceVariant
-    val background = MaterialTheme.colorScheme.background
     AppIconButton(onClick = onClick) {
-        Canvas(Modifier.size(22.dp)) {
-            val u = size.minDimension / 24f
-            val sw = 2f * u
-            drawLine(tint, Offset(4 * u, 8 * u), Offset(20 * u, 8 * u), strokeWidth = sw, cap = StrokeCap.Round)
-            drawLine(tint, Offset(4 * u, 16 * u), Offset(20 * u, 16 * u), strokeWidth = sw, cap = StrokeCap.Round)
-            drawCircle(background, radius = 2.6f * u, center = Offset(15 * u, 8 * u))
-            drawCircle(tint, radius = 2.6f * u, center = Offset(15 * u, 8 * u), style = Stroke(width = sw))
-            drawCircle(background, radius = 2.6f * u, center = Offset(9 * u, 16 * u))
-            drawCircle(tint, radius = 2.6f * u, center = Offset(9 * u, 16 * u), style = Stroke(width = sw))
-        }
+        Icon(
+            Icons.Filled.Tune,
+            contentDescription = "Settings",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

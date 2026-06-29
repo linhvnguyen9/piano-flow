@@ -6,7 +6,7 @@ android-targetSdk = "36"
 androidx-activity = "1.13.0"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.19.0"
-androidx-datastore = "1.1.1"
+androidx-datastore = "1.2.1"
 androidx-espresso = "3.7.0"
 androidx-lifecycle = "2.11.0-beta01"
 androidx-testExt = "1.3.0"
@@ -43,6 +43,7 @@ compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.re
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 compose-material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "composeMaterialIcons" }
+compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "composeMaterialIcons" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
@@ -66,6 +67,7 @@ kotlinSerialization-gradlePlugin = { module = "org.jetbrains.kotlin.plugin.seria
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core" }
+koin-android = { module = "io.insert-koin:koin-android" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 
@@ -89,6 +91,8 @@ roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 
 pianoflow-kmpLibrary = { id = "pianoflow.kmp.library" }
 pianoflow-kmpCompose = { id = "pianoflow.kmp.compose" }
+pianoflow-kmpComposeApi = { id = "pianoflow.kmp.compose.api" }
+pianoflow-koin = { id = "pianoflow.koin" }
 pianoflow-composeScreenshotTesting = { id = "pianoflow.compose-screenshot-testing" }
 pianoflow-enro = { id = "pianoflow.enro" }
 pianoflow-showkase = { id = "pianoflow.showkase" }

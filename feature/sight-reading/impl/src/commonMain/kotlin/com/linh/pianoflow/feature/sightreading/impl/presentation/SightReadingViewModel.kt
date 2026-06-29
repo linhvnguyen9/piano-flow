@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.linh.pianoflow.core.designsystem.StaffNoteState
 import com.linh.pianoflow.core.model.Pitch
 import com.linh.pianoflow.feature.sightreading.impl.domain.NoteRecord
-import com.linh.pianoflow.feature.sightreading.impl.domain.SightReadingSettings
+import com.linh.pianoflow.feature.sightreading.impl.domain.SightReadingSettingsRepository
 import com.linh.pianoflow.feature.sightreading.impl.domain.SightReadingSummary
 import com.linh.pianoflow.feature.sightreading.impl.domain.summarize
 import com.linh.pianoflow.feature.sightreading.impl.domain.whiteNotesIn
@@ -32,7 +32,7 @@ import kotlin.time.DurationUnit
  * the immutable [SightReadingUiState] the stateless screen renders.
  */
 class SightReadingViewModel(
-    private val settings: SightReadingSettings,
+    private val settings: SightReadingSettingsRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SightReadingUiState())

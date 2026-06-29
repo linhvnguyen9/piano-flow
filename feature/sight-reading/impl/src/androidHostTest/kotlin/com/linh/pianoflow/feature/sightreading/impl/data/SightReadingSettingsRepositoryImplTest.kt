@@ -11,14 +11,14 @@ import java.io.File
 import kotlin.test.assertEquals
 
 /**
- * Round-trips the DataStore-backed settings: defaults when nothing is stored, and each
- * toggle persists independently and reads back. Uses a throwaway temp file per test
- * instance (JUnit news the class per @Test, so the file/store are isolated).
+ * Round-trips the DataStore-backed settings repository: defaults when nothing is stored,
+ * and each toggle persists independently and reads back. Uses a throwaway temp file per
+ * test instance (JUnit news the class per @Test, so the file/store are isolated).
  */
-class SightReadingSettingsDataStoreTest {
+class SightReadingSettingsRepositoryImplTest {
 
     private val file: File = File.createTempFile("sr_settings", ".preferences_pb").also { it.delete() }
-    private val store = SightReadingSettingsDataStore(
+    private val repository = SightReadingSettingsRepositoryImpl(
         PreferenceDataStoreFactory.createWithPath(produceFile = { file.absolutePath.toPath() }),
     )
 
@@ -31,28 +31,28 @@ class SightReadingSettingsDataStoreTest {
     fun defaults_to_both_aids_on() = runBlocking {
         assertEquals(
             SightReadingPreferences(showNoteNames = true, showMiddleC = true),
-            store.preferences.first(),
+            repository.preferences.first(),
         )
     }
 
     @Test
     fun persists_each_toggle_independently() = runBlocking {
-        store.setShowNoteNames(false)
+        repository.setShowNoteNames(false)
         assertEquals(
             SightReadingPreferences(showNoteNames = false, showMiddleC = true),
-            store.preferences.first(),
+            repository.preferences.first(),
         )
 
-        store.setShowMiddleC(false)
+        repository.setShowMiddleC(false)
         assertEquals(
             SightReadingPreferences(showNoteNames = false, showMiddleC = false),
-            store.preferences.first(),
+            repository.preferences.first(),
         )
 
-        store.setShowNoteNames(true)
+        repository.setShowNoteNames(true)
         assertEquals(
             SightReadingPreferences(showNoteNames = true, showMiddleC = false),
-            store.preferences.first(),
+            repository.preferences.first(),
         )
     }
 }
