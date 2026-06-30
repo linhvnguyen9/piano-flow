@@ -75,7 +75,6 @@ fun MusicStaff(
         val lineX0 = s * 0.6f
         val lineX1 = w - s * 0.6f
 
-        // --- five staff lines --------------------------------------------------
         for (i in 0..4) {
             val y = staffTopY + i * s
             drawLine(
@@ -87,7 +86,6 @@ fun MusicStaff(
             )
         }
 
-        // --- clef glyph (scaled so its reference point sits on the ref line) ----
         val refLineY = staffTopY + (if (which == Clef.Treble) 3 else 1) * s
         val k = (glyph.targetSpaces * s) / (glyph.maxY - glyph.minY)
         val tx = glyph.padX - k * glyph.minX
@@ -100,13 +98,11 @@ fun MusicStaff(
             glyph.dots.forEach { dot -> drawCircle(ink, radius = 22f, center = dot, alpha = 0.9f) }
         }
 
-        // --- note position -----------------------------------------------------
         val topLineDiatonic = if (which == Clef.Treble) 38 else 26
         val halfSpaces = topLineDiatonic - diatonic(midi)
         val noteY = staffTopY + halfSpaces * (s / 2f)
         val noteX = w * 0.6f
 
-        // --- ledger lines above / below the staff ------------------------------
         val spacesFromTop = halfSpaces / 2f
         val ledgerHalf = s * 1.2f
         if (spacesFromTop > 4f) {
@@ -123,7 +119,6 @@ fun MusicStaff(
             }
         }
 
-        // --- notehead (rotated ellipse) ----------------------------------------
         val rx = s * 0.74f
         val ry = s * 0.56f
         withTransform({ rotate(-22f, pivot = Offset(noteX, noteY)) }) {

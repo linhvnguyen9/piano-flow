@@ -78,8 +78,6 @@ class SightReadingViewModel(
         }
     }
 
-    // --- intents --------------------------------------------------------------
-
     fun startSession() {
         cancelPending()
         screen = SightReadingScreen.DRILL
@@ -151,8 +149,6 @@ class SightReadingViewModel(
         viewModelScope.launch { settings.setShowMiddleC(value) }
     }
 
-    // --- flow -----------------------------------------------------------------
-
     private fun advance() {
         val next = index + 1
         if (next >= SESSION_LENGTH) {
@@ -221,8 +217,6 @@ class SightReadingViewModel(
         cancelPending()
         super.onCleared()
     }
-
-    // --- render ---------------------------------------------------------------
 
     private fun publish() {
         val staffState = when (phase) {

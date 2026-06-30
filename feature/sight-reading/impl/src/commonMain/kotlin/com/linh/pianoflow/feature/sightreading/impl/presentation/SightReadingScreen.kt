@@ -109,8 +109,6 @@ fun SightReadingScreenContent(
     }
 }
 
-// ============================ START ============================
-
 @Composable
 private fun StartScreen(
     state: SightReadingUiState,
@@ -165,8 +163,6 @@ private fun RangeChip(label: String) {
     }
 }
 
-// ============================ DRILL ============================
-
 @Composable
 private fun DrillScreen(
     state: SightReadingUiState,
@@ -174,7 +170,6 @@ private fun DrillScreen(
     onOpenSettings: () -> Unit,
 ) {
     Column(Modifier.fillMaxSize()) {
-        // header: settings + progress count
         Row(
             modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -187,7 +182,6 @@ private fun DrillScreen(
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
-        // progress bar
         Box(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp)) {
             Box(
                 Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp))
@@ -200,7 +194,6 @@ private fun DrillScreen(
             }
         }
 
-        // staff hero
         Column(
             modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically),
@@ -224,7 +217,6 @@ private fun DrillScreen(
             }
         }
 
-        // feedback zone (kept above the keyboard)
         Box(
             modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(horizontal = 24.dp, vertical = 0.dp)
                 .padding(bottom = 10.dp),
@@ -233,7 +225,6 @@ private fun DrillScreen(
             FeedbackZone(state)
         }
 
-        // docked keyboard in a warm tray
         Box(
             modifier = Modifier.fillMaxWidth()
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
@@ -299,8 +290,6 @@ private fun FeedbackZone(state: SightReadingUiState) {
         )
     }
 }
-
-// ============================ SUMMARY ============================
 
 @Composable
 private fun SummaryScreen(
@@ -409,8 +398,6 @@ private fun SlowNoteRow(slow: SlowNote) {
         )
     }
 }
-
-// ============================ shared bits ============================
 
 @Composable
 private fun PrimaryButton(label: String, onClick: () -> Unit) {

@@ -58,7 +58,6 @@ internal fun SettingsSheetContent(
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
         )
 
-        // "Soon" — clef & range is not yet configurable.
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).alpha(0.5f),
             verticalAlignment = Alignment.CenterVertically,

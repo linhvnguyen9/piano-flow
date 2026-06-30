@@ -48,8 +48,6 @@ class SightReadingScreenInspection {
     @get:Rule
     val composeRule = createComposeRule()
 
-    // --- Start ----------------------------------------------------------------
-
     @Test
     @Config(qualifiers = "w411dp-h900dp-xxhdpi", sdk = [35])
     fun inspect_start_411_light() =
@@ -64,8 +62,6 @@ class SightReadingScreenInspection {
     @Config(qualifiers = "w360dp-h1500dp-xxhdpi", sdk = [35])
     fun inspect_start_compact_font2_0() =
         captureScreen(false, 2f, startState(), "_inspect_sightreading_start_compact_font2_0.png")
-
-    // --- Drill (idle) ---------------------------------------------------------
 
     @Test
     @Config(qualifiers = "w411dp-h900dp-xxhdpi", sdk = [35])
@@ -93,8 +89,6 @@ class SightReadingScreenInspection {
     fun inspect_drill_compact_font2_0_light() =
         captureScreen(false, 2f, drillIdleState(), "_inspect_sightreading_drill_compact_font2_0.png")
 
-    // --- Drill (feedback) -----------------------------------------------------
-
     @Test
     @Config(qualifiers = "w411dp-h900dp-xxhdpi", sdk = [35])
     fun inspect_drillcorrect_411_light() =
@@ -104,8 +98,6 @@ class SightReadingScreenInspection {
     @Config(qualifiers = "w411dp-h900dp-xxhdpi", sdk = [35])
     fun inspect_drillincorrect_411_dark() =
         captureScreen(true, 1f, drillIncorrectState(), "_inspect_sightreading_drillincorrect_411_dark.png")
-
-    // --- Summary --------------------------------------------------------------
 
     @Test
     @Config(qualifiers = "w411dp-h1700dp-xxhdpi", sdk = [35])
@@ -122,8 +114,6 @@ class SightReadingScreenInspection {
     fun inspect_summary_compact_font2_0() =
         captureScreen(false, 2f, summaryState(), "_inspect_sightreading_summary_compact_font2_0.png")
 
-    // --- Settings sheet -------------------------------------------------------
-
     @Test
     @Config(qualifiers = "w411dp-h1000dp-xxhdpi", sdk = [35])
     fun inspect_settings_411_light() =
@@ -133,8 +123,6 @@ class SightReadingScreenInspection {
     @Config(qualifiers = "w360dp-h1900dp-xxhdpi", sdk = [35])
     fun inspect_settings_compact_font2_0() =
         captureSettings(false, 2f, settingsState(), "_inspect_sightreading_settings_compact_font2_0.png")
-
-    // --- helpers --------------------------------------------------------------
 
     private fun captureScreen(dark: Boolean, fontScale: Float, state: SightReadingUiState, name: String) =
         capture(dark, fontScale, name) {
