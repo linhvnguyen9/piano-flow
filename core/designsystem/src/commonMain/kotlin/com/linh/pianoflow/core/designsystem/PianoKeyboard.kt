@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.linh.pianoflow.core.designsystem.theme.PianoBlackKey
@@ -28,6 +29,15 @@ import com.linh.pianoflow.core.designsystem.theme.PianoKeyOutline
 import com.linh.pianoflow.core.designsystem.theme.PianoWhiteKey
 import com.linh.pianoflow.core.model.Pitch
 
+/**
+ * Semantics tag on **interactive** piano keys. A multi-octave keyboard is intrinsically
+ * narrower than 48 dp per key (e.g. ~22 dp for 15 keys on a 360 dp screen), so a Tier-1
+ * touch-target check would flag every key. The mitigation is the full-height (120 dp) hit
+ * area; the Sight Reading settings sheet surfaces the trade-off and offers a narrower
+ * range. Tier-1 assertions skip nodes carrying this tag.
+ */
+const val PianoKeyTestTag = "pianoKey"
+
 @Composable
 fun PianoKeyboard(
     startMidi: Int,
@@ -35,6 +45,7 @@ fun PianoKeyboard(
     highlighted: Set<Int>,
     modifier: Modifier = Modifier,
     labels: Boolean = false,
+    anchorMidi: Int? = null,
     onKeyTap: ((Int) -> Unit)? = null,
 ) {
     val whiteLit = MaterialTheme.colorScheme.primaryContainer
@@ -64,12 +75,20 @@ fun PianoKeyboard(
                     .border(1.dp, borderColor, RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
                 Box(
                     modifier = if (onKeyTap != null)
-                        rowMod.clickable { onKeyTap(midi) } else rowMod,
+                        rowMod.testTag(PianoKeyTestTag).clickable { onKeyTap(midi) } else rowMod,
                     contentAlignment = Alignment.BottomCenter
                 ) {
-                    if (labels) {
+                    // `labels` names every key; `anchorMidi` names just one — a subtle
+                    // orientation landmark (e.g. middle C) so a learner has a key to count
+                    // from without every answer being given away.
+                    val keyLabel = when {
+                        labels -> Pitch.name(midi)
+                        midi == anchorMidi -> Pitch.NAMES[Pitch.pc(midi)]
+                        else -> null
+                    }
+                    if (keyLabel != null) {
                         Text(
-                            Pitch.name(midi),
+                            keyLabel,
                             color = whiteText,
                             fontSize = 9.sp,
                             modifier = Modifier.padding(bottom = 4.dp)
@@ -93,7 +112,7 @@ fun PianoKeyboard(
                 .clip(RoundedCornerShape(bottomStart = 3.dp, bottomEnd = 3.dp))
                 .background(if (lit) blackLit else blackBg)
             Box(
-                modifier = if (onKeyTap != null) mod.clickable { onKeyTap(blackMidi) } else mod
+                modifier = if (onKeyTap != null) mod.testTag(PianoKeyTestTag).clickable { onKeyTap(blackMidi) } else mod
             )
         }
 

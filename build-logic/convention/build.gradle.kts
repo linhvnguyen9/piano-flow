@@ -30,6 +30,10 @@ gradlePlugin {
             id = "pianoflow.enro"
             implementationClass = "com.linh.pianoflow.buildlogic.EnroConventionPlugin"
         }
+        register("koin") {
+            id = "pianoflow.koin"
+            implementationClass = "com.linh.pianoflow.buildlogic.KoinConventionPlugin"
+        }
         register("showkase") {
             id = "pianoflow.showkase"
             implementationClass = "com.linh.pianoflow.buildlogic.ShowkaseConventionPlugin"

@@ -20,6 +20,10 @@ class ComponentsIndexTest {
             "com.linh.pianoflow.core.designsystem.PianoKeyboard" to
                 "PianoKeyboard(startMidi = 60, endMidi = 72, highlighted = setOf(60, 64, 67), labels = true)"
         ),
+        "MusicStaff" to (
+            "com.linh.pianoflow.core.designsystem.MusicStaff" to
+                "MusicStaff(midi = 67, state = StaffNoteState.Default, space = 22.dp, width = 240.dp)"
+        ),
         "ChordProgressionField" to (
             "com.linh.pianoflow.feature.chordsmoother.impl.presentation.ChordProgressionField" to
                 "ChordProgressionField(tokens = listOf(\"Cmaj7\"), editingText = \"\", examples = emptyList(), onTokensChange = {}, onEditingTextChange = {}, onChipTap = {}, onOpenPicker = {}, onPickExample = {})"

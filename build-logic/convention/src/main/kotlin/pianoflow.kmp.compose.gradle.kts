@@ -18,6 +18,12 @@ kotlin {
         optIn.add("androidx.compose.material3.ExperimentalMaterial3Api")
     }
 
+    // Compose Multiplatform feature/design modules target iOS too, so their screens can be
+    // hosted in the iOS app via a ComposeUIViewController (the app shell — bottom nav — stays
+    // native per platform). Symmetric with pianoflow.kmp.library / pianoflow.kmp.compose.api.
+    iosArm64()
+    iosSimulatorArm64()
+
     androidLibrary {
         namespace = moduleNamespace
         compileSdk = libs.findVersion("android-compileSdk").get().requiredVersion.toInt()

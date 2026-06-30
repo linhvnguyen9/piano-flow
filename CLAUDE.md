@@ -6,13 +6,13 @@ Kotlin Multiplatform (Android + iOS) Compose Multiplatform app, organized into f
 
 - `:core:model` — pure-Kotlin music primitives (`Pitch`, `Chord`, `Quality`). KMP, iOS-capable.
 - `:core:audio` — `TonePlayer` (expect/actual) + `ChordSynth`. KMP, iOS-capable.
-- `:core:designsystem` — shared Compose UI (`PianoKeyboard`, theme). Android + common.
+- `:core:designsystem` — shared Compose UI (`PianoKeyboard`, theme). KMP (Android + iOS via Compose Multiplatform).
 - `:feature:chord-smoother:api` — public contracts for the "Songs" feature: `ProgressionSolver`, `ChordProgressionParser`, `Voicing`, `ChordSmootherEntry`. KMP, iOS-capable; no Compose UI.
-- `:feature:chord-smoother:impl` — the implementation, in Clean-Arch packages `domain/` · `data/` (empty until persistence) · `presentation/` (incl. `SongsViewModel`) · `di/` (Koin module). Android + common.
+- `:feature:chord-smoother:impl` — the implementation, in Clean-Arch packages `domain/` · `data/` (empty until persistence) · `presentation/` (incl. `SongsViewModel`) · `di/` (Koin module). KMP (Android + iOS via Compose Multiplatform).
 - `:shared` — KMP umbrella that builds the iOS `SharedLogic` framework (exports `:core:model` + `:core:audio`). Holds template `Greeting`/`Platform` (throwaway).
 - `:androidApp` — Android entry point; `PianoFlowApp` starts Koin and registers `chordSmootherModule`; `App()` renders the Koin-injected `ChordSmootherEntry`.
 
-**DI is Koin** (constructor DSL: `singleOf(::Impl) bind Contract::class`, `viewModelOf(::Vm)`). Module build files stay tiny via convention plugins in `build-logic/`: `pianoflow.kmp.library` (KMP + Android + iOS targets), `pianoflow.kmp.compose` (the above minus iOS, plus Compose), and `pianoflow.compose-screenshot-testing` (Roborazzi).
+**DI is Koin** (constructor DSL: `singleOf(::Impl) bind Contract::class`, `viewModelOf(::Vm)`). Module build files stay tiny via convention plugins in `build-logic/`: `pianoflow.kmp.library` (KMP + Android + iOS targets), `pianoflow.kmp.compose` (the above plus Compose Multiplatform — also targets iOS, so feature screens + `core:designsystem` are iOS-capable), and `pianoflow.compose-screenshot-testing` (Roborazzi).
 
 ## Visual inspection of Compose screens (preferred over asking the user)
 
@@ -109,6 +109,18 @@ Feature code uses Material 3 primitives (`Text`, `Surface`, `Button`, chips, `Mo
 
 Experimental Material 3 APIs (e.g. `ModalBottomSheet`) need no per-file `@OptIn`: the `pianoflow.kmp.compose` convention plugin opts in project-wide via `compilerOptions { optIn.add("androidx.compose.material3.ExperimentalMaterial3Api") }`. Add other broadly-used opt-in markers there too rather than annotating each file.
 
+## File organization (keep context loads small)
+
+**Put each substantial, independently-editable composable in its own file**, so reading one file into context costs only what that task needs — not a whole screen. E.g. the settings sheet is `SettingsSheet.kt` (`SettingsSheetContent`), separate from `SightReadingScreen.kt`; editing the sheet doesn't pull in the drill/summary screens and vice-versa. Same for a reusable sub-component.
+
+But **don't split trivial, tightly-coupled glue** into its own file — that's just noise. A one-line Enro `@NavigationDestination` wrapper lives in the screen file next to the screen it renders (e.g. `SightReadingDestination` sits atop `SightReadingScreen.kt`), not in a `*Destination.kt`. Rule of thumb: split by *what you'd edit alone*; keep together what only ever changes together.
+
+**Don't repeat dependency/plugin wiring across module build files** — hoist it into a convention plugin in `build-logic/`. Cross-cutting setup (Compose-for-api via `pianoflow.kmp.compose.api`, Koin via `pianoflow.koin`) lives in a plugin; only module-specific deps (a feature's own DataStore, an extra icon pack) stay in the module's `build.gradle.kts`.
+
+## Comments explain *why*, not *what*
+
+A comment earns its place by saying something the code can't. Keep comments that capture intent, rationale, trade-offs, gotchas, or a non-obvious decision (e.g. why interactive piano keys are an accepted sub-48dp carve-out, why `noTruncate` counts dropped glyphs instead of `hasVisualOverflow`). **Delete comments that merely restate the code:** section-divider banners (`// ===== START =====`, `// --- intents ---`, `// --- five staff lines ---`), layout labels that echo the next line (`// progress bar`, `// staff hero`, `// docked keyboard`), and step narration. Well-named functions and a Composable's structure are the "what" — a divider before each block just duplicates them and rots when the code moves. KDoc on a public declaration (documenting its contract) is fine; a terse decoder of a magic value (`midi = 67, // G4`) is fine. A banner that only labels the block below it is not.
+
 ## Build basics
 
 - Android SDKs: `compileSdk = 36`, `minSdk = 24`. AGP 9.0.1, Gradle 9.1, Kotlin 2.4.0, CMP 1.11.1.
@@ -121,7 +133,7 @@ Experimental Material 3 APIs (e.g. `ModalBottomSheet`) need no per-file `@OptIn`
 - `feature/chord-smoother/api/`, `feature/chord-smoother/impl/` — the "Songs" chord-smoother feature (contracts vs implementation).
 - `shared/` — KMP umbrella for the iOS framework.
 - `androidApp/` — Android entry point + Koin startup.
-- `iosApp/` — Xcode project (currently the KMP template; real Compose UI is not wired to iOS yet).
+- `iosApp/` — Xcode project (currently the KMP template). The feature Compose modules + `core:designsystem` now **compile** for iOS (CMP); the remaining step is the iOS app entry — a SwiftUI shell hosting each feature's `@Composable` via `ComposeUIViewController`, with the bottom-nav/tab shell **native per platform** (Android's `MainScaffold` is intentionally not shared, for an iOS-native feel). Platform-specific DI (e.g. the Preferences `DataStore` file location) is wired with `expect/actual` Koin modules — see `SightReadingModule.{android,ios}.kt`.
 - `build-logic/` — convention plugins.
 - `docs/superpowers/specs/`, `docs/superpowers/plans/` — design docs and implementation plans (gitignored).
 - `docs/adr/` — architecture decision records.
